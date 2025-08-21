@@ -66,7 +66,7 @@ export const useAuth = () => {
       if (file) {
         console.log({ file });
 
-        router.push("/pricing");
+        router.push("/dashboard/pricing");
 
         return;
       }
@@ -123,7 +123,7 @@ export const useAuth = () => {
       console.log({ file });
 
       if (file) {
-        router.push("/pricing");
+        router.push("/dashboard/pricing");
 
         return;
       }
