@@ -34,18 +34,22 @@ export const getCoverLetters = async (): Promise<CoverLetterDoc[]> => {
 
 export const handleUserDocuments = async (
   user: UserProfileType,
-  userStats: UserStatsType,
+  userStats: UserStatsType
 ) => {
   if (!user?.uid || !userStats.currentPlan) return;
 
   const currentPlanId = userStats.currentPlan.type;
 
-  if (CoverLetterPlansIdEnum.standard === currentPlanId) {
+  if (
+    CoverLetterPlansIdEnum.standard === currentPlanId &&
+    userStats!.stats &&
+    userStats.stats.remainingCoverLetter
+  ) {
     const newStats = {
       ...userStats,
       stats: {
         ...userStats.stats,
-        remainingCoverLetter: userStats!.stats!.remainingCoverLetter! - 1,
+        remainingCoverLetter: Number(userStats.stats.remainingCoverLetter) - 1,
       },
     };
 
