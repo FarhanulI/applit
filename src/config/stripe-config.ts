@@ -4,6 +4,7 @@ import { PricingPlan } from "@/types/types";
 
 export const pricingPlans: PricingPlan[] = [
   {
+    typeNumber: 1,
     id: "cv-correction",
     name: "Professional CV Correction",
     description:
@@ -28,6 +29,7 @@ export const pricingPlans: PricingPlan[] = [
     stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PROFESSIONAL_CV_PRICE_ID, // Add your actual price ID from Stripe
   },
   {
+    typeNumber: 2,
     id: "pay-as-you-go",
     name: "Pay As You Go",
     description:
@@ -52,6 +54,7 @@ export const pricingPlans: PricingPlan[] = [
     stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PAYGO_PRICE_ID, // Add your actual price ID from Stripe
   },
   {
+    typeNumber: 3,
     id: "standard-pack",
     name: "Standard Pack",
     description:
@@ -77,6 +80,7 @@ export const pricingPlans: PricingPlan[] = [
     stripePriceId: process.env.NEXT_PUBLIC_STRIPE_STANDARD_PRICE_ID, // Add your actual price ID from Stripe
   },
   {
+    typeNumber: 4,
     id: "unlimited",
     name: "Unlimited",
     description:
@@ -101,6 +105,7 @@ export const pricingPlans: PricingPlan[] = [
     type: "subscription",
     stripeProductId: process.env.NEXT_PUBLIC_STRIPE_UNLIMITED_PRODUCT_ID, // Add your actual product ID from Stripe
     stripePriceId: process.env.NEXT_PUBLIC_STRIPE_UNLIMITED_PRICE_ID, // Add your actual price ID from Stripe
+    paypalProductId: process.env.NEXT_PUBLIC_PAYPAL_UNLIMITED_PRODUCT_ID
   },
 ];
 

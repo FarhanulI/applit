@@ -1,16 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // components/pricing/CheckoutButton.tsx
 "use client";
 
 import PaymentModal from "@/app/dashboard/pricing/_component/paymentMethodModal";
 import { useAuthContext } from "@/contexts/auth";
-import { PaymentMethodEnum, PlanValdityEnum } from "@/enums";
+import {
+  PaymentMethodEnum,
+  PlanEnumNum,
+  PlansNameEnum,
+} from "@/enums";
 import { updateUserPlan } from "@/lib/file/apis";
-import { UserStatsType, UserPurchaseListType } from "@/lib/file/types";
-import { getRemainingDays } from "@/lib/file/utils";
+import { UserStatsType } from "@/lib/file/types";
 import { getStripe } from "@/lib/stripe/stripe";
 import { CheckoutRequest, PricingPlan } from "@/types/types";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { cancelPayPalSubscription, cancelStripeSubscription } from "../apis";
 
 interface CheckoutButtonProps {
   planId: string;
@@ -18,7 +23,7 @@ interface CheckoutButtonProps {
   buttonStyle: "outline" | "gradient" | "single";
   disabled?: boolean;
   className?: string;
-  plan?: PricingPlan;
+  plan: PricingPlan;
 }
 
 export default function CheckoutButton({
@@ -56,9 +61,8 @@ export default function CheckoutButton({
       // Create checkout session
       const checkoutData: CheckoutRequest = {
         planId,
-        successUrl: `${window.location.origin}/payment/success?plan=${planId}`,
-        cancelUrl: `${window.location.origin}/payment/cancel?plan=${planId}`,
         user: user,
+        stripeCustomerId: user?.stripeCustomerId,
       };
 
       const response = await fetch("/api/stripe/create-checkout-session", {
@@ -103,52 +107,64 @@ export default function CheckoutButton({
     }
   };
 
-  const handleCheckoutPaypal = async () => {
-    setLoading(true);
-
-    const response = await fetch("/api/paypal/create-order", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ amount: plan!.priceAmount / 100 }),
-    });
-
-    console.log({ response });
-  };
-
-  const handlePayment = (paymentMethod: string) => {
-    if (PaymentMethodEnum.stripe === paymentMethod) {
-      handleCheckout();
-      return;
-    }
-
-    if (PaymentMethodEnum.paypal === paymentMethod) {
-      handleCheckoutPaypal();
-      return;
-    }
-  };
-
   const handleCancelPlan = async () => {
     setLoading(true);
-    const response = await updateUserPlan(user?.uid as string, {
-      currentPlan: null,
-      ...(userStats?.stats.remainingCoverLetter
-        ? {
-            stats: {
-              ...userStats?.stats,
-              remainingCoverLetter: null,
-            },
-          }
-        : {}),
-    });
 
-    setLoading(false);
+    const currentPlan = userStats?.currentPlan;
+    const paymentMethod = currentPlan?.paymentMethod;
+    let isCanceled = false;
 
-    setUserStats(response as UserStatsType);
+    try {
+      // Cancel Stripe subscription if applicable
+      if (
+        paymentMethod === PaymentMethodEnum.stripe &&
+        currentPlan?.sessionId
+      ) {
+        isCanceled = await cancelStripeSubscription(currentPlan.sessionId);
+      }
+
+      // Cancel PayPal subscription if applicable
+      if (
+        paymentMethod === PaymentMethodEnum.paypal &&
+        currentPlan?.subscriptionID
+      ) {
+        const cancelResult = await cancelPayPalSubscription(
+          currentPlan.subscriptionID
+        );
+        isCanceled = cancelResult.success;
+      }
+
+      // If cancellation failed, stop further processing
+      if (!isCanceled) {
+        setLoading(false);
+        return;
+      }
+
+      // Prepare updated user plan and stats
+      const updatedStats: Partial<UserStatsType> = {
+        currentPlan: null,
+      };
+
+      if (userStats?.stats?.remainingCoverLetter) {
+        updatedStats.stats = {
+          ...userStats.stats,
+          remainingCoverLetter: null,
+        };
+      }
+
+      // Update user data in the database
+      const response = await updateUserPlan(user?.uid as string, updatedStats);
+
+      // Update local state
+      setUserStats(response as UserStatsType);
+    } catch (error) {
+      console.error("❌ Error cancelling subscription:", error);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  if (userStats && userStats?.currentPlan?.type === plan?.id) {
+  
+  if (userStats && userStats?.currentPlan?.type === plan?.id && userStats?.currentPlan?.type === PlansNameEnum.unlimited) {
     return (
       <button
         onClick={handleCancelPlan}
@@ -165,9 +181,14 @@ export default function CheckoutButton({
         )}
       </button>
     );
-  };
+  }
 
-  const handleDisable = () =>  loading || disabled || !!userStats?.currentPlan?.type;
+  const handleDisable = () =>
+    loading ||
+    disabled ||
+    (!!userStats?.currentPlan?.type &&
+      plan.typeNumber <=
+        PlanEnumNum[userStats.currentPlan.type as keyof typeof PlanEnumNum]);
 
   return (
     <>
@@ -178,7 +199,7 @@ export default function CheckoutButton({
       >
         {loading ? (
           <div className="flex items-center justify-center gap-2">
-            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"/>
+            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
             Processing...
           </div>
         ) : (
@@ -190,7 +211,8 @@ export default function CheckoutButton({
         isOpen={isOpenPaymentModal}
         onClose={() => setisOpenPaymentModal(false)}
         plan={plan!}
-        handlePayment={handlePayment}
+        handleStripeCheckout={handleCheckout}
+        setisOpenPaymentModal={setisOpenPaymentModal}
       />
     </>
   );

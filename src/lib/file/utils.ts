@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import {
-  UserStatsType,
-  UserPurchaseListType,
-  UserStatsTypes,
-} from "./types";
+import { UserStatsType, UserPurchaseListType, UserStatsTypes } from "./types";
 import { db } from "@/config/firebase-config";
 import { Dispatch, SetStateAction } from "react";
 
@@ -25,9 +21,11 @@ export const updateUserWithPlan = async (
     ? (existingDoc.data() as UserStatsType)
     : null;
 
+  const newCurrentPlan = currentPlan || existingData?.currentPlan;
+
   const updatedPurchasePlans: UserPurchaseListType[] = [
     ...(existingData?.purchasePlans || []),
-    currentPlan,
+    newCurrentPlan,
   ];
 
   // @ts-ignore
@@ -37,7 +35,7 @@ export const updateUserWithPlan = async (
   };
 
   const updatedUserData: UserStatsType = {
-    currentPlan,
+    currentPlan: newCurrentPlan,
     purchasePlans: updatedPurchasePlans,
     stats: updatedStats,
   };

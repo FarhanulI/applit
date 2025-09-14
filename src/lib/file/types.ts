@@ -10,16 +10,18 @@ export type UserPurchaseListType = {
   sessionId: string;
   validity?: PlanValdityEnum;
   expiredAt?: string; // ISO string
+  subscriptionID?: string | null;
+  paymentMethod?: string | null;
 };
 
 export type UserStatsTypes = {
-  remainingCoverLetter: number | null;
-  uploadedCv: number;
+  remainingCoverLetter: number | string | null
+  uploadedCv?: number;
 };
 
 export type UserStatsType = {
   purchasePlans: UserPurchaseListType[];
-  stats: UserStatsTypes;
+  stats: UserStatsTypes | null;
   currentPlan: UserPurchaseListType | null;
 };
 

@@ -11,12 +11,14 @@ export interface PricingPlan {
   subtitle: string;
   subtitleStyle?: string;
   buttonText: string;
-  buttonStyle: 'outline' | 'gradient' | 'single';
+  buttonStyle: "outline" | "gradient" | "single";
   popular: boolean;
   features: string[];
-  type: 'one-time' | 'subscription';
+  type: "one-time" | "subscription";
   stripeProductId?: string;
   stripePriceId?: string;
+  typeNumber: number;
+  paypalProductId?: string;
 }
 
 export interface CheckoutSession {
@@ -26,12 +28,11 @@ export interface CheckoutSession {
 
 export interface CheckoutRequest {
   planId: string;
-  successUrl?: string;
-  cancelUrl?: string;
-  user?: UserProfileType
+  stripeCustomerId?: string;
+  user?: UserProfileType;
 }
 
 export interface SubscriptionRequest {
   planId: string;
-  customerId?: string;
+  customerId: string;
 }

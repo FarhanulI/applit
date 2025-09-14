@@ -37,13 +37,17 @@ const CoverLetter = () => {
   };
 
   const handleDownload = async (template: CoverLetterDoc) => {
+    if(!userStats?.stats?.remainingCoverLetter || userStats?.stats?.remainingCoverLetter === 0) { 
+      alert('You Have completed your stock')
+      return }
+
     setDownloadLoading(true);
-    const newStats = await handleUserDocuments(user!, userStats!);
+    const newStats = await handleUserDocuments(user!, userStats!, setUserStats);
     console.log({ newStats });
-    if (!newStats) {
-      setDownloadLoading(false);
-      return;
-    }
+    // if (!newStats) {
+    //   setDownloadLoading(false);
+    //   return;
+    // }
 
     setUserStats(newStats as UserStatsType);
     setDownloadLoading(false);
@@ -101,12 +105,6 @@ const CoverLetter = () => {
             <div
               className={`relative h-64 p-4 bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200`}
             >
-              {/* {template.featured && (
-              <div className="absolute top-2 right-2 z-10">
-                <Star className="text-yellow-500 fill-current" size={20} />
-              </div>
-            )} */}
-
               {/* Mock document content */}
               <div
                 className={`w-full h-full rounded shadow-sm p-3 bg-white text-gray-900`}

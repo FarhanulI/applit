@@ -8,10 +8,7 @@ import { CiStar } from "react-icons/ci";
 import { GoZap } from "react-icons/go";
 import { FaRegClock } from "react-icons/fa";
 import { TbUsers } from "react-icons/tb";
-import {
-  heroBannerFeatures,
-  pricingPlans,
-} from "@/config/stripe-config";
+import { heroBannerFeatures, pricingPlans } from "@/config/stripe-config";
 import CvUploadFile from "./cvUploadFile";
 
 // Type for icon components
@@ -86,13 +83,6 @@ const PricingPlans = () => {
             </div>
 
             <CvUploadFile plan={pricingPlans[0]} />
-
-            {/* <CheckoutButton
-              planId={pricingPlans[0].id}
-              buttonText={pricingPlans[0].buttonText}
-              buttonStyle={pricingPlans[0].buttonStyle}
-              plan={pricingPlans[0]}
-            /> */}
           </div>
         </div>
 
@@ -102,27 +92,6 @@ const PricingPlans = () => {
             <PricingCard key={plan.id} plan={plan} />
           ))}
         </div>
-
-        {/* Trust Indicators - Commented out */}
-        {/* <div className="mt-16 text-center">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-            {trustIndicators.map((indicator, index) => {
-              const IconComponent = iconMap[indicator.icon];
-              if (!IconComponent) {
-                return null;
-              }
-              return (
-                <div key={index} className="flex flex-col items-center">
-                  <IconComponent className="w-8 h-8 text-emerald-500 mb-2" />
-                  <div className="text-2xl font-bold text-gray-900">
-                    {indicator.value}
-                  </div>
-                  <div className="text-gray-600">{indicator.label}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div> */}
       </div>
     </div>
   );

@@ -61,8 +61,6 @@ export default function CheckoutButton({
       // Create checkout session
       const checkoutData: CheckoutRequest = {
         planId,
-        successUrl: `${window.location.origin}/payment/success?plan=${planId}`,
-        cancelUrl: `${window.location.origin}/payment/cancel?plan=${planId}`,
         user: user,
       };
 
@@ -112,7 +110,7 @@ export default function CheckoutButton({
     setLoading(true);
     const response = await updateUserPlan(user?.uid as string, {
       currentPlan: null,
-      ...(userStats?.stats.remainingCoverLetter
+      ...(userStats?.stats!.remainingCoverLetter
         ? {
             stats: {
               ...userStats?.stats,

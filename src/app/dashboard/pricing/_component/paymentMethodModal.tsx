@@ -1,38 +1,51 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// components/payment-modal.tsx
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { X, CreditCard, Wallet } from 'lucide-react';
-import { PricingPlan } from '@/types/types';
-import { PaymentMethodEnum } from '@/enums';
+import { Dispatch, SetStateAction, useState } from "react";
+import { X } from "lucide-react";
+import { PricingPlan } from "@/types/types";
+import { PayPalButtons } from "@paypal/react-paypal-js";
+import StripeCheckoutButton from "./stripebutton";
+import PayPalProvider from "@/app/providers/paypal-provider";
+import {
+  createPaypalOrder,
+  createPaypalSubscription,
+  onApprovePaypal,
+} from "../apis";
+import { useAuthContext } from "@/contexts/auth";
+import { useRouter } from "next/navigation";
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   plan: PricingPlan;
-  handlePayment: (provider: 'stripe' | 'paypal') => void;
+  handleStripeCheckout: () => void;
+  setisOpenPaymentModal: Dispatch<SetStateAction<boolean>>;
 }
 
-type PaymentMethod = 'stripe' | 'paypal' | null;
+type PaymentMethod = "stripe" | "paypal" | null;
 
-export default function PaymentModal({ 
-  isOpen, 
-  onClose, 
-  plan, 
-  handlePayment 
+export default function PaymentModal({
+  isOpen,
+  onClose,
+  plan,
+  handleStripeCheckout,
+  setisOpenPaymentModal,
 }: PaymentModalProps) {
+  const { user } = useAuthContext();
+  const router = useRouter();
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(null);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur  z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b">
           <h2 className="text-2xl font-bold">Complete Payment</h2>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full"
           >
@@ -43,12 +56,13 @@ export default function PaymentModal({
         {/* Plan Summary */}
         <div className="p-6 border-b bg-gray-50">
           <h3 className="font-semibold text-lg">{plan.name}</h3>
-          <p className="text-3xl font-bold text-blue-600">
-            {plan.price}
-          </p>
+          <p className="text-3xl font-bold text-blue-600">{plan.price}</p>
           <ul className="mt-3 space-y-1">
             {plan.features.slice(0, 3).map((feature, index) => (
-              <li key={index} className="text-sm text-gray-600 flex items-center">
+              <li
+                key={index}
+                className="text-sm text-gray-600 flex items-center"
+              >
                 <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                 {feature}
               </li>
@@ -61,40 +75,98 @@ export default function PaymentModal({
           <div className="p-6">
             <h4 className="font-semibold mb-4">Choose Payment Method</h4>
             <div className="space-y-3">
-              {/* Stripe Option */}
-              <button
-                onClick={() => handlePayment(PaymentMethodEnum.stripe)}
-                className="w-full cursor-pointer p-4 border border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors flex items-center justify-between"
-              >
-                <div className="flex items-center">
-                  <CreditCard className="w-6 h-6 mr-3 text-blue-600" />
-                  <div className="text-left">
-                    <div className="font-medium">Credit/Debit Card</div>
-                    <div className="text-sm text-gray-500">Visa, Mastercard, American Express</div>
-                  </div>
-                </div>
-                <div className="text-blue-600 font-medium">Stripe</div>
-              </button>
+              <StripeCheckoutButton
+                price={plan.priceAmount / 100}
+                onClick={() => {
+                  handleStripeCheckout();
+                }}
+              />
 
-              {/* PayPal Option */}
-              <button
-                onClick={() => handlePayment(PaymentMethodEnum.paypal)}
-                className="w-full p-4 cursor-pointer border border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors flex items-center justify-between"
+              {/* <button
+                onClick={async () => {
+                  const payload = {
+                    name: plan.name,
+                    description: plan.description,
+                    price: plan.priceAmount / 100,
+                  };
+                  const response = await fetch("/api/paypal/create-plan", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                  });
+
+                  console.log({ response });
+                }}
               >
-                <div className="flex items-center">
-                  <Wallet className="w-6 h-6 mr-3 text-blue-600" />
-                  <div className="text-left">
-                    <div className="font-medium">PayPal</div>
-                    <div className="text-sm text-gray-500">Pay with your PayPal account</div>
-                  </div>
-                </div>
-                <div className="text-blue-600 font-medium">PayPal</div>
-              </button>
+                aaaaaa
+              </button> */}
+
+              <div className="border rounded-md p-2">
+                {plan.type === "one-time" && (
+                  <PayPalProvider
+                    options={{
+                      clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
+                      currency: "EUR",
+                      intent: "capture",
+                    }}
+                  >
+                    <PayPalButtons
+                      style={{ layout: "vertical" }}
+                      createOrder={(data, actions) =>
+                        createPaypalOrder(data, actions, plan)
+                      }
+                      onApprove={(data, actions) =>
+                        onApprovePaypal(
+                          // @ts-ignore
+                          data,
+                          plan,
+                          router,
+                          setisOpenPaymentModal
+                        )
+                      }
+                      onError={(err) => {
+                        console.error("PayPal error:", err);
+                      }}
+                    />
+                  </PayPalProvider>
+                )}
+                {plan.type === "subscription" && (
+                  <PayPalProvider
+                    options={{
+                      clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
+                      currency: "EUR",
+                      intent: "subscription",
+                      vault: true,
+                    }}
+                  >
+                    <PayPalButtons
+                      style={{ layout: "vertical" }}
+                      createSubscription={(data, actions) =>
+                        createPaypalSubscription(data, actions, plan, user!)
+                      }
+                      onApprove={(data, actions) =>
+                        onApprovePaypal(
+                          // @ts-ignore
+                          data,
+                          plan,
+                          router,
+                          setisOpenPaymentModal
+                        )
+                      }
+                      onError={(err) => {
+                        console.error("PayPal error:", err);
+                      }}
+                    />
+                  </PayPalProvider>
+                )}
+              </div>
             </div>
           </div>
         )}
 
-        {/* Payment Forms */}
+        {/* Fallback Payment Info (optional) */}
         {selectedMethod && (
           <div className="p-6">
             <div className="flex items-center mb-4">
@@ -105,7 +177,8 @@ export default function PaymentModal({
                 ← Back to payment methods
               </button>
               <span className="text-sm text-gray-500">
-                Paying with {selectedMethod === 'stripe' ? 'Credit Card' : 'PayPal'}
+                Paying with{" "}
+                {selectedMethod === "stripe" ? "Credit Card" : "PayPal"}
               </span>
             </div>
           </div>

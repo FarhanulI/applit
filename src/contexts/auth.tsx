@@ -50,11 +50,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
-    console.log({userStats})
-  }, [userStats])
-  
-
-  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       const userProfile = handleSetUserProfile(firebaseUser);
 

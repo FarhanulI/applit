@@ -4,4 +4,5 @@ export interface UserProfileType {
   displayName: string;
   photoURL: string;
   createdAt: string;
+  stripeCustomerId?: string
 }

@@ -1,18 +1,22 @@
 // app/providers/paypal-provider.tsx
-'use client';
+"use client";
 
-import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import { PayPalScriptProvider, ReactPayPalScriptOptions } from "@paypal/react-paypal-js";
 
 const initialOptions = {
   clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
-  currency: 'USD',
-  intent: 'capture',
+  currency: "EUR",
+  intent: "capture",
 };
 
-export default function PayPalProvider({ children }: { children: React.ReactNode }) {
+export default function PayPalProvider({
+  children,
+  options,
+}: {
+  children: React.ReactNode;
+  options: ReactPayPalScriptOptions
+}) {
   return (
-    <PayPalScriptProvider options={initialOptions}>
-      {children}
-    </PayPalScriptProvider>
+    <PayPalScriptProvider options={options}>{children}</PayPalScriptProvider>
   );
 }

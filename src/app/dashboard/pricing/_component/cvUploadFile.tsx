@@ -5,6 +5,7 @@ import { useAuthContext } from "@/contexts/auth";
 import { getStripe } from "@/lib/stripe/stripe";
 import { CheckoutRequest, PricingPlan } from "@/types/types";
 import React, { useState } from "react";
+import PaymentModal from "./paymentMethodModal";
 
 interface ICvUploadFile {
   plan: PricingPlan;
@@ -14,6 +15,7 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
   // @ts-ignore
   const { user } = useAuthContext();
   const [loading, setLoading] = useState(false);
+  const [isOpenPaymentModal, setisOpenPaymentModal] = useState<boolean>(false);
 
   const handleCheckout = async () => {
     if (loading) return;
@@ -24,8 +26,6 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
       // Create checkout session
       const checkoutData: CheckoutRequest = {
         planId: plan.id,
-        successUrl: `${window.location.origin}/payment/success?plan=${plan.id}`,
-        cancelUrl: `${window.location.origin}/payment/cancel?plan=${plan.id}`,
         user: user,
       };
 
@@ -79,7 +79,6 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
         accept=".pdf,.doc,.docx"
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
         onChange={(e) => {
-          console.log({ files: e.target.files });
           const file = e.target.files?.[0];
           if (file) {
             const reader = new FileReader();
@@ -92,7 +91,7 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
               sessionStorage.setItem("cvFileName", file.name);
 
               console.log("File saved to sessionStorage");
-              handleCheckout();
+              setisOpenPaymentModal(true)
             };
 
             reader.readAsDataURL(file); // Converts file to base64 string
@@ -106,6 +105,14 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
       >
         {loading ? "Uploading..." : "Get Your CV Corrected Now"}
       </label>
+
+      <PaymentModal
+        isOpen={isOpenPaymentModal}
+        onClose={() => setisOpenPaymentModal(false)}
+        plan={plan!}
+        handleStripeCheckout={handleCheckout}
+        setisOpenPaymentModal={setisOpenPaymentModal}
+      />
     </div>
   );
 };

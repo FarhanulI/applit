@@ -24,8 +24,6 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
       // Create checkout session
       const checkoutData: CheckoutRequest = {
         planId: plan.id,
-        successUrl: `${window.location.origin}/payment/success?plan=${plan.id}`,
-        cancelUrl: `${window.location.origin}/payment/cancel?plan=${plan.id}`,
         user: user,
       };
 

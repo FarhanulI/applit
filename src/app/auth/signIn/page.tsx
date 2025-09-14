@@ -1,11 +1,12 @@
 "use client";
 
 import { useAuth } from "@/lib/auth";
+import GoogleLoginButton from "@/ui/buttons/googleButton";
 import { useRouter } from "next/navigation";
 import React from "react";
 
 const SignIn = () => {
-  const router = useRouter()
+  const router = useRouter();
 
   const {
     formData,
@@ -16,6 +17,7 @@ const SignIn = () => {
     setShowPassword,
     handleSignIn,
     handleInputChange,
+    handleGoogleSignIn,
   } = useAuth();
 
   return (
@@ -242,6 +244,8 @@ const SignIn = () => {
             </p>
           </div>
         </form>
+
+        <GoogleLoginButton onClick={async () => await handleGoogleSignIn()} />
       </div>
     </div>
   );

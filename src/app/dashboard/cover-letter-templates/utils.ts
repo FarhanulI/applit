@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { db } from "@/config/firebase-config";
-import { CoverLetterPlansIdEnum } from "@/enums";
+import { CoverLetterPlansIdEnum, PlansNameEnum } from "@/enums";
 import { UserProfileType } from "@/lib/auth/type";
 import { updateUserPlan } from "@/lib/file/apis";
 import { UserStatsType } from "@/lib/file/types";
+import { updateUserWithPlan } from "@/lib/file/utils";
 import { collection, getDocs } from "firebase/firestore";
 import { Dispatch, SetStateAction } from "react";
 
@@ -34,28 +36,56 @@ export const getCoverLetters = async (): Promise<CoverLetterDoc[]> => {
 
 export const handleUserDocuments = async (
   user: UserProfileType,
-  userStats: UserStatsType
+  userStats: UserStatsType,
+  setUserStats: Dispatch<React.SetStateAction<UserStatsType | undefined>>
 ) => {
-  if (!user?.uid || !userStats.currentPlan) return;
+  const uid = user?.uid;
+  const currentPlan = userStats?.currentPlan;
+  const stats = userStats?.stats;
 
-  const currentPlanId = userStats.currentPlan.type;
+  console.log({currentPlan});
+  
 
-  console.log({ currentPlanId });
+  if (!uid || !currentPlan) return;
 
-  if ( currentPlanId === CoverLetterPlansIdEnum.standard ) {
-    const newStats = {
-      ...userStats,
-      stats: {
-        ...userStats.stats,
-        remainingCoverLetter: userStats.stats.remainingCoverLetter! - 1,
-      },
+  const updatedStats: UserStatsType = { ...userStats };
+
+  if (currentPlan.type === CoverLetterPlansIdEnum.unlimited) {
+    updatedStats.stats = {
+      ...stats,
+      remainingCoverLetter: "Unlimited",
+    };
+  }
+
+  if (currentPlan.type === CoverLetterPlansIdEnum.standard) {
+    if (typeof stats?.remainingCoverLetter !== "number") return;
+
+    updatedStats.stats = {
+      ...stats,
+      remainingCoverLetter: Math.max(stats.remainingCoverLetter - 1, 0),
+    };
+  }
+
+  if (currentPlan.type === PlansNameEnum.payAsYouGo) {
+    if (typeof stats?.remainingCoverLetter !== "number") return;
+
+    updatedStats.stats = {
+      ...stats,
+      remainingCoverLetter: Math.max(stats.remainingCoverLetter - 1, 0),
     };
 
-    const res = await updateUserPlan(user?.uid, newStats);
-    if (res) {
-      return res;
-    }
+    // @ts-ignore
+    await await updateUserPlan(uid, {currentPlan: null});
+  }
 
-    return;
+  // If stats not updated for a known plan, skip update
+  if (!updatedStats.stats) return;
+
+  try {
+    const res = await updateUserPlan(uid, updatedStats);
+    return res ?? null;
+  } catch (error) {
+    console.error("❌ Error updating user plan:", error);
+    return null;
   }
 };

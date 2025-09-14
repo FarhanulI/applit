@@ -18,13 +18,15 @@ export async function middleware(req: NextRequest) {
     "/sign-up",
     "/auth/signIn",
     "/auth/sign-up",
-    "/payment/success",
-    "/payment/cancel",
   ];
 
-  const isPublicRoute = publicRoutes.includes(pathname);
+  const paymentRoute = ["/payment/success", "/payment/cancel"];
 
-  console.log({ pathname });
+  if (paymentRoute.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  const isPublicRoute = publicRoutes.includes(pathname);
 
   // User is not authenticated and trying to access protected route
   if (!token && !isPublicRoute) {

@@ -27,9 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="">
-        <PayPalProvider>
           <AuthProvider>{children}</AuthProvider>
-        </PayPalProvider>
       </body>
     </html>
   );

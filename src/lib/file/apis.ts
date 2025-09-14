@@ -12,16 +12,13 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, getStorage } from "firebase/storage";
-import {
-  UserCvDocument,
-  UserStatsType,
-  UserPurchaseListType,
-} from "./types";
+import { UserCvDocument, UserStatsType, UserPurchaseListType } from "./types";
 import { getRandomCategory, LOCAL_PDF_PATH, updateUserWithPlan } from "./utils";
 import { Dispatch, SetStateAction, use } from "react";
 import { UserProfileType } from "../auth/type";
 import { addDays } from "date-fns";
 import { CoverLetterDoc } from "@/app/cover-letter/utils";
+import { pricingPlans } from "@/config/stripe-config";
 
 export const uploadFile = async (file: File): Promise<string | undefined> => {
   if (!file) return;
@@ -54,7 +51,8 @@ export const fetchUserStats = async (user: Partial<UserProfileType> | null) => {
 
 export const handleCVCorrectionPlan = async (
   user: UserProfileType,
-  setUserStats: Dispatch<SetStateAction<UserStatsType | undefined>>
+  setUserStats: Dispatch<SetStateAction<UserStatsType | undefined>>,
+  planId: string
 ) => {
   try {
     const file = handleCheckSessionFile();
@@ -63,7 +61,11 @@ export const handleCVCorrectionPlan = async (
     }
 
     const sessionId = sessionStorage.getItem("checkoutSessionId");
-    const plan = JSON.parse(sessionStorage.getItem("currentPlan") || "{}");
+    const plan = pricingPlans.find((item) => item.id === planId);
+
+    if (!plan) {
+      throw new Error("Plan information is missing or invalid.");
+    }
 
     const downloadUrl = await uploadFile(file);
 
@@ -76,37 +78,76 @@ export const handleCVCorrectionPlan = async (
       createdAt: new Date(),
     });
 
-    const purchasePlan = {
-      type: plan.id,
-      name: plan.name || "Professional CV Correction",
-      amount: plan.priceAmount / 100,
-      purchasedAt: new Date().toISOString(),
-      billingCycle: "one_time",
-      payment_status: "succeeded",
-      sessionId: sessionId || "",
-      downloadUrl: downloadUrl || "",
-    };
-
     // @ts-ignore
-    return updateUserWithPlan(user?.uid, purchasePlan, {}, setUserStats);
+    return updateUserWithPlan(user?.uid, null, {}, setUserStats);
   } catch (error) {
     console.log(error);
     throw error;
   }
 };
 
-export const handleStandardPlan = async (
+export const handlePaytAsGoPlan = async (
   user: UserProfileType,
-  setUserStats: Dispatch<SetStateAction<UserStatsType | undefined>>
+  setUserStats: Dispatch<SetStateAction<UserStatsType | undefined>>,
+  planId: string,
+  subscriptionID: string | null,
+  paymentMethod: string | null
 ) => {
   if (!user) return false;
 
   try {
     const sessionId = sessionStorage.getItem("checkoutSessionId");
-    const plan = JSON.parse(sessionStorage.getItem("currentPlan") || "{}");
+    const plan = pricingPlans.find((item) => item.id === planId);
 
     // ✅ Validate required plan fields
-    if (!plan.id || !plan.priceAmount) {
+    if (!plan) {
+      throw new Error("Plan information is missing or invalid.");
+    }
+
+    // ✅ Construct the current plan
+    const currentPlan: UserPurchaseListType = {
+      type: plan.id,
+      name: plan.name,
+      amount: plan.priceAmount / 100,
+      purchasedAt: new Date().toISOString(),
+      billingCycle: "one_time",
+      payment_status: "succeeded",
+      sessionId: sessionId || "",
+      validity: PlanValdityEnum.standard,
+      expiredAt: addDays(
+        new Date().toISOString(),
+        PlanValdityEnum.standard
+      ).toISOString(),
+      subscriptionID,
+      paymentMethod,
+    };
+
+    const newStats = {
+      remainingCoverLetter: 1,
+    };
+
+    return updateUserWithPlan(user.uid, currentPlan, newStats, setUserStats);
+  } catch (error) {
+    console.error("❌ Error handling standard plan:", error);
+    return false;
+  }
+};
+
+export const handleStandardPlan = async (
+  user: UserProfileType,
+  setUserStats: Dispatch<SetStateAction<UserStatsType | undefined>>,
+  planId: string,
+  subscriptionID: string | null,
+  paymentMethod: string | null
+) => {
+  if (!user) return false;
+
+  try {
+    const sessionId = sessionStorage.getItem("checkoutSessionId");
+    const plan = pricingPlans.find((item) => item.id === planId);
+
+    // ✅ Validate required plan fields
+    if (!plan) {
       throw new Error("Plan information is missing or invalid.");
     }
 
@@ -124,6 +165,8 @@ export const handleStandardPlan = async (
         new Date().toISOString(),
         PlanValdityEnum.standard
       ).toISOString(),
+      subscriptionID,
+      paymentMethod,
     };
 
     const newStats = {
@@ -139,16 +182,19 @@ export const handleStandardPlan = async (
 
 export const handleUnlimitedPlan = async (
   user: UserProfileType,
-  setUserStats: Dispatch<SetStateAction<UserStatsType | undefined>>
+  setUserStats: Dispatch<SetStateAction<UserStatsType | undefined>>,
+  planId: string,
+  subscriptionID: string | null,
+  sessionId: string | null,
+  paymentMethod: string | null
 ) => {
   if (!user) return false;
 
   try {
-    const sessionId = sessionStorage.getItem("checkoutSessionId");
-    const plan = JSON.parse(sessionStorage.getItem("currentPlan") || "{}");
+    const plan = pricingPlans.find((item) => item.id === planId);
 
     // ✅ Validate required plan fields
-    if (!plan.id || !plan.priceAmount) {
+    if (!plan) {
       throw new Error("Plan information is missing or invalid.");
     }
 
@@ -166,10 +212,12 @@ export const handleUnlimitedPlan = async (
         new Date().toISOString(),
         PlanValdityEnum.unlimited
       ).toISOString(),
+      subscriptionID,
+      paymentMethod,
     };
 
     const newStats = {
-      remainingCoverLetter: 30,
+      remainingCoverLetter: "Unlimited",
     };
 
     return updateUserWithPlan(user.uid, currentPlan, newStats, setUserStats);

@@ -10,6 +10,7 @@ import { handleCheckSessionFile } from "@/hooks/auth/utils";
 import { PlansNameEnum } from "@/enums";
 import {
   handleCVCorrectionPlan,
+  handlePaytAsGoPlan,
   handleStandardPlan,
   handleUnlimitedPlan,
 } from "@/lib/file/apis";
@@ -20,22 +21,46 @@ function SuccessPageContent() {
   const { user, setUserStats } = useAuthContext();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
-  const planId = searchParams.get("plan");
+  const planId = searchParams.get("planId");
+  const subscriptionID = searchParams.get("subscriptionID");
+  const paymentMethod = searchParams.get("paymentMethod");
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (planId && user && user?.uid) {
       if (planId === PlansNameEnum.cv_correction) {
-        handleCVCorrectionPlan(user, setUserStats);
+        handleCVCorrectionPlan(user, setUserStats, planId);
+      }
+      if (planId === PlansNameEnum.payAsYouGo) {
+        handlePaytAsGoPlan(
+          user,
+          setUserStats,
+          planId,
+          subscriptionID,
+          paymentMethod
+        );
       }
 
       if (planId === PlansNameEnum.standard) {
-        handleStandardPlan(user, setUserStats);
+        handleStandardPlan(
+          user,
+          setUserStats,
+          planId,
+          subscriptionID,
+          paymentMethod
+        );
       }
 
       if (planId === PlansNameEnum.unlimited) {
-        handleUnlimitedPlan(user, setUserStats);
+        handleUnlimitedPlan(
+          user,
+          setUserStats,
+          planId,
+          subscriptionID,
+          sessionId,
+          paymentMethod
+        );
       }
     }
     // Simulate session validation or fetching
@@ -68,8 +93,8 @@ function SuccessPageContent() {
         </h1>
 
         <p className="text-gray-600 mb-6 text-lg">
-          Your <strong>{planId || "CV Correction"}</strong> plan is now
-          active. We&lsquo;re excited to help you land your next job!
+          Your <strong>{planId || "CV Correction"}</strong> plan is now active.
+          We&lsquo;re excited to help you land your next job!
         </p>
 
         {/* What's Next Section */}
@@ -95,9 +120,7 @@ function SuccessPageContent() {
           <div className="flex items-start gap-3">
             <BsPersonVcard className="text-purple-600 w-6 h-6 mt-1" />
             <div>
-              <p className="font-semibold text-gray-800">
-                Download Once Ready
-              </p>
+              <p className="font-semibold text-gray-800">Download Once Ready</p>
               <p className="text-sm text-gray-600">
                 Get your professionally revised CV delivered straight to your
                 dashboard and email.
@@ -140,14 +163,16 @@ function SuccessPageContent() {
 // Main component that wraps the content in Suspense
 export default function SuccessPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-pulse text-center">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 text-sm">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="animate-pulse text-center">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-gray-500 text-sm">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <SuccessPageContent />
     </Suspense>
   );

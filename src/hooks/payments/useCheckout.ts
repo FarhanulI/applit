@@ -23,8 +23,6 @@ export const useCheckout = () => {
     try {
       const checkoutData: CheckoutRequest = {
         planId,
-        successUrl: options?.successUrl || `${window.location.origin}/payment/success?plan=${planId}`,
-        cancelUrl: options?.cancelUrl || `${window.location.origin}/payment/cancel?plan=${planId}`
       };
 
       const response = await fetch('/api/stripe/create-subscription', {

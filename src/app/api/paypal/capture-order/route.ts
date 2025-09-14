@@ -1,4 +1,4 @@
-// app/api/paypal/create-order/route.ts
+// app/api/paypal/capture-order/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!;
@@ -18,58 +18,33 @@ async function getAccessToken() {
   });
 
   const data = await response.json();
-  console.log({data})
   return data.access_token;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { amount, currency = 'EUR' } = await request.json();
-
-    if (!amount) {
-      return NextResponse.json({ error: 'Amount is required' }, { status: 400 });
-    }
+    const { orderID } = await request.json();
 
     const accessToken = await getAccessToken();
 
-    const orderData = {
-      intent: 'CAPTURE',
-      purchase_units: [
-        {
-          amount: {
-            currency_code: currency,
-            value: amount,
-          },
-        },
-      ],
-    };
-
-    console.log({orderData: JSON.stringify(orderData)});
-    
-
-    const response = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders`, {
+    const response = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders/${orderID}/capture`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(orderData),
     });
 
-    const order = await response.json();
+    const data = await response.json();
 
-    console.log({order})
+    console.log({captureData: data});
 
     if (!response.ok) {
-      throw new Error(`PayPal API error: ${order.message}`);
+      return NextResponse.json({ error: data }, { status: 500 });
     }
 
-    return NextResponse.json(order);
+    return NextResponse.json(data);
   } catch (error) {
-    console.error('Create order error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create order' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to capture order' }, { status: 500 });
   }
 }
