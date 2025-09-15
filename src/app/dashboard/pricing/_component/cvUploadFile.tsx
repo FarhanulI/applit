@@ -80,6 +80,8 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
         onChange={(e) => {
           const file = e.target.files?.[0];
+          console.log({ file });
+
           if (file) {
             const reader = new FileReader();
 
@@ -91,7 +93,7 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
               sessionStorage.setItem("cvFileName", file.name);
 
               console.log("File saved to sessionStorage");
-              setisOpenPaymentModal(true)
+              setisOpenPaymentModal(true);
             };
 
             reader.readAsDataURL(file); // Converts file to base64 string
@@ -108,7 +110,11 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
 
       <PaymentModal
         isOpen={isOpenPaymentModal}
-        onClose={() => setisOpenPaymentModal(false)}
+        onClose={() => {
+          sessionStorage.removeItem("cvFileBase64");
+          sessionStorage.removeItem("cvFileName");
+          setisOpenPaymentModal(false);
+        }}
         plan={plan!}
         handleStripeCheckout={handleCheckout}
         setisOpenPaymentModal={setisOpenPaymentModal}
