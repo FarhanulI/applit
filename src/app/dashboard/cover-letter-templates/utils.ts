@@ -75,7 +75,9 @@ export const handleUserDocuments = async (
     };
 
     // @ts-ignore
-    await await updateUserPlan(uid, {currentPlan: null});
+    const res = await updateUserPlan(uid, {currentPlan: null, ...updatedStats});
+
+    return res ?? null;
   }
 
   // If stats not updated for a known plan, skip update

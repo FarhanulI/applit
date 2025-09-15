@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!;
 const PAYPAL_CLIENT_SECRET = process.env.NEXT_PUBLIC_PAYPAL_SECRET_KEY!;
-const PAYPAL_BASE_URL = process.env.NEXT_PUBLIC_PAYPAL_BASE_URL!;
+const PAYPAL_BASE_URL =process.env.NODE_ENV === 'production' ? 'https://api.paypal.com' :  process.env.NEXT_PUBLIC_PAYPAL_BASE_URL!;
 
 async function getAccessToken() {
   const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64');
