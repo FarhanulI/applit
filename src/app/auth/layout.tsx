@@ -1,10 +1,15 @@
 "use client";
 import Header from "@/ui/headers/headers";
 import MainLogo from "@/ui/svgs/mainLogo";
-import Image from "next/image";
 import React from "react";
 
-const AuthLayout = ({ children }) => {
+import { ReactNode } from "react";
+
+interface AuthLayoutProps {
+  children: ReactNode;
+}
+
+const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
     <div>
       <Header />
