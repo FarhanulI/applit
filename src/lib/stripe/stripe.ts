@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 
 // Server-side Stripe instance
 export const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
+  apiVersion: '2025-08-27.basil',
   typescript: true,
 });
 

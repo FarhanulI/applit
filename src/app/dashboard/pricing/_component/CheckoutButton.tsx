@@ -35,16 +35,16 @@ export default function CheckoutButton({
   plan,
 }: CheckoutButtonProps) {
   // @ts-ignore
-  const { user, userStats, setUserStats } = useAuthContext();
+  const { user, setUser } = useAuthContext();
   const [loading, setLoading] = useState(false);
   const [isOpenPaymentModal, setisOpenPaymentModal] = useState<boolean>(false);
 
   const getButtonStyles = (style: "outline" | "gradient" | "single") => {
     const baseStyles =
-      "w-full py-3 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed";
+      "w-full py-3 rounded-xl text-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed";
 
     const styles = {
-      outline: `${baseStyles}  border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white`,
+      outline: `${baseStyles} bg-[#27292A] text-white`,
       gradient: `${baseStyles} bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg hover:shadow-xl`,
       single: `bg-white text-emerald-600 px-8 py-3 rounded-full font-semibold hover:bg-emerald-50 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:scale-105`,
     };
@@ -110,7 +110,7 @@ export default function CheckoutButton({
   const handleCancelPlan = async () => {
     setLoading(true);
 
-    const currentPlan = userStats?.currentPlan;
+    const currentPlan = user?.currentPlan;
     const paymentMethod = currentPlan?.paymentMethod;
     let isCanceled = false;
 
@@ -145,9 +145,9 @@ export default function CheckoutButton({
         currentPlan: null,
       };
 
-      if (userStats?.stats?.remainingCoverLetter) {
+      if (user?.stats?.remainingCoverLetter) {
         updatedStats.stats = {
-          ...userStats.stats,
+          ...user.stats,
           remainingCoverLetter: null,
         };
       }
@@ -156,7 +156,7 @@ export default function CheckoutButton({
       const response = await updateUserPlan(user?.uid as string, updatedStats);
 
       // Update local state
-      setUserStats(response as UserStatsType);
+      setUser(response as UserStatsType);
     } catch (error) {
       console.error("❌ Error cancelling subscription:", error);
     } finally {
@@ -164,7 +164,7 @@ export default function CheckoutButton({
     }
   };
   
-  if (userStats && userStats?.currentPlan?.type === plan?.id && userStats?.currentPlan?.type === PlansNameEnum.unlimited) {
+  if (user && user?.currentPlan?.type === plan?.id && user?.currentPlan?.type === PlansNameEnum.unlimited) {
     return (
       <button
         onClick={handleCancelPlan}
@@ -186,9 +186,9 @@ export default function CheckoutButton({
   const handleDisable = () =>
     loading ||
     disabled ||
-    (!!userStats?.currentPlan?.type &&
+    (!!user?.currentPlan?.type &&
       plan.typeNumber <=
-        PlanEnumNum[userStats.currentPlan.type as keyof typeof PlanEnumNum]);
+        PlanEnumNum[user.currentPlan.type as keyof typeof PlanEnumNum]);
 
   return (
     <>

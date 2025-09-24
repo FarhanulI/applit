@@ -68,7 +68,6 @@ const PricingPlans = () => {
                 const IconComponent = iconMap[feature.icon];
                 // Add safety check for undefined icons
                 if (!IconComponent) {
-                  console.warn(`Icon "${feature.icon}" not found in iconMap`);
                   return (
                     <div
                       key={index}

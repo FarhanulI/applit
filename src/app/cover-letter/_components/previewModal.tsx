@@ -1,5 +1,7 @@
 import { Download, ExternalLink, X } from "lucide-react";
 import { CoverLetterDoc } from "../utils";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { useMemo } from "react";
 
 const PreviewModal = ({
   template,
@@ -10,25 +12,33 @@ const PreviewModal = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  const handleDownload = () => {
-    if (!template) return;
+  // const handleDownload = () => {
+  //   if (!template) return;
 
-    // Create a temporary anchor element to trigger download
-    const link = document.createElement("a");
-    link.href = template.downloadUrl;
-    link.download = template.fileName + ".pdf";
-    link.target = "_blank";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  //   // Create a temporary anchor element to trigger download
+  //   const link = document.createElement("a");
+  //   link.href = template.downloadUrl;
+  //   link.download = template.fileName + ".pdf";
+  //   link.target = "_blank";
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  // };
 
   const handleOpenInNewTab = () => {
     if (!template) return;
     window.open(template.downloadUrl, "_blank");
   };
 
+  const pfFile = useMemo(() => {
+    const storage = getStorage();
+    const pdfRef = ref(storage, template?.downloadUrl);
+    return pdfRef;
+  }, [template]);
+
   if (!isOpen || !template) return null;
+
+  console.log({ pfFile });
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur  z-50 flex items-center justify-center p-4">
@@ -52,7 +62,7 @@ const PreviewModal = ({
               Open in New Tab
             </button>
             <button
-              onClick={handleDownload}
+              // onClick={() => handleDownload()}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Download size={16} />
@@ -69,14 +79,12 @@ const PreviewModal = ({
 
         {/* PDF Preview */}
         <div className="flex-1 min-h-0">
-          <iframe
-            src={`${template.downloadUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-            className="w-full h-full border-0"
-            title={`Preview of ${template.fileName}`}
-            onError={() => {
-              console.error("Failed to load PDF preview");
-            }}
-          />
+          {/* <embed
+            src='"https://firebasestorage.googleapis.com/v0/b/applymate-a9626.firebasestorage.app/o/Tasks_Requirements_user_payment%20(1).pdf?alt=media'
+            type="application/pdf"
+            width="100%"
+            height="600px"
+          /> */}
         </div>
 
         {/* Modal Footer */}

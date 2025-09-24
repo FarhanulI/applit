@@ -115,7 +115,7 @@ export default function PaymentModal({
                     <PayPalButtons
                       style={{ layout: "vertical" }}
                       createOrder={(data, actions) =>
-                        createPaypalOrder(data, actions, plan)
+                        createPaypalOrder(data, actions, plan, user)
                       }
                       onApprove={(data, actions) =>
                         onApprovePaypal(

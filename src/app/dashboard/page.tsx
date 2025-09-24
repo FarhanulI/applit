@@ -17,9 +17,10 @@ import {
 } from "lucide-react";
 import { useAuthContext } from "@/contexts/auth";
 import { fetchDocuments } from "@/lib/file/apis";
-import { UserCvDocument } from "@/lib/file/types";
+import { UserCvDocument, UserPurchaseListType } from "@/lib/file/types";
 import CurrentPlanSection from "./_components/currentPlanSection";
 import { CoverLetterPlansIdEnum } from "@/enums";
+import PageTitle from "@/ui/text/pageTitle";
 
 const activities = [
   {
@@ -69,26 +70,28 @@ const RecentDocuemnts = ({ user, documents, loading }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm ">
-      <div className="p-6 -b">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Recent Requested CV
-        </h3>
-      </div>
-      <div className="p-6">
-        <div className="space-y-4">
-          {documents.slice(0, 3).map((doc: any) => (
-            <div key={doc.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <FileText className="w-5 h-5 text-gray-400" />
-                <div>
-                  <p className="font-medium text-gray-900">{doc.fileName}</p>
-                  <p className="text-sm text-gray-600">{doc.type}</p>
+    <div className="rounded-lg shadow-sm bg-white p-4">
+      <div className="bg-[#F5F5F5] h-full">
+        <div className="p-6 ">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Recent Requested CV
+          </h3>
+        </div>
+        <div className="p-6">
+          <div className="space-y-4">
+            {documents.slice(0, 3).map((doc: any) => (
+              <div key={doc.id} className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <FileText className="w-5 h-5 text-gray-400" />
+                  <div>
+                    <p className="font-medium text-gray-900">{doc.fileName}</p>
+                    <p className="text-sm text-gray-600">{doc.type}</p>
+                  </div>
                 </div>
+                <StatusBadge status={doc.correction_status} />
               </div>
-              <StatusBadge status={doc.correction_status} />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -96,7 +99,7 @@ const RecentDocuemnts = ({ user, documents, loading }) => {
 };
 
 const Dashboard = () => {
-  const { user, userStats } = useAuthContext();
+  const { user } = useAuthContext();
 
   const [documentsCV, setDocumentsCV] = useState<UserCvDocument[]>([]);
   const [coverLetters, setCoverLetters] = useState<UserCvDocument[]>([]);
@@ -105,8 +108,8 @@ const Dashboard = () => {
   useEffect(() => {
     const loadDocs = async () => {
       if (user) {
-        const docs = await fetchDocuments(user);
-        const coverLetter = await fetchDocuments(user, "cover-letter");
+        const docs = await fetchDocuments(user.uid);
+        const coverLetter = await fetchDocuments(user.uid, "cover-letter");
         setDocumentsCV(docs);
         setCoverLetters(coverLetter);
       }
@@ -116,85 +119,97 @@ const Dashboard = () => {
     loadDocs();
   }, [user]);
 
+  const calculateTotalSpent = (plans: UserPurchaseListType[]) => {
+    if (!plans || plans.length === 0) return 0;
+
+    return plans.reduce((total, plan) => total + plan.amount, 0).toFixed(2);
+  };
+
   return (
-    <div className="space-y-6 ">
+    <div className="space-y-6">
       <CurrentPlanSection />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm">
+
+      <PageTitle title="Overview" showLogoutButton={false} />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4 bg-white rounded-md shadow-md">
+        <div className="bg-[#FAF8F4] p-6 rounded-lg shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total CV</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-blue-active">
                 {documentsCV?.length}
               </p>
             </div>
-            <FileText className="w-8 h-8 text-blue-500" />
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm ">
+        <div className="bg-[#EFFCEF] p-6 rounded-lg shadow-sm ">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Letters</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-blue-active">
                 {coverLetters.length}
               </p>
             </div>
-            <TrendingUp className="w-8 h-8 text-green-500" />
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm ">
+        <div className="bg-[#F4F6FA] p-6 rounded-lg shadow-sm ">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">
                 Remaining Letters
               </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {userStats?.currentPlan?.type ===
-                CoverLetterPlansIdEnum.unlimited
+              <p className="text-2xl font-bold text-blue-active">
+                {user?.currentPlan?.type === CoverLetterPlansIdEnum.unlimited
                   ? "Unlimited"
-                  : userStats?.stats?.remainingCoverLetter}
+                  : user?.stats?.remainingCoverLetter || 0}
               </p>
             </div>
-            <TrendingUp className="w-8 h-8 text-green-500" />
           </div>
         </div>
 
-        {/* <div className="bg-white p-6 rounded-lg shadow-sm ">
+        <div className="bg-[#E6F5F9] p-6 rounded-lg shadow-sm ">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Spent</p>
-              <p className="text-2xl font-bold text-gray-900">€{0}</p>
+              <p className="text-2xl font-bold text-blue-active">
+                €
+                {calculateTotalSpent(
+                  user?.purchasePlans as UserPurchaseListType[]
+                )}
+              </p>
             </div>
             <CreditCard className="w-8 h-8 text-orange-500" />
           </div>
-        </div> */}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-         {/* @ts-ignore */}
+        {/* @ts-ignore */}
         <RecentDocuemnts user={user} documents={documentsCV} />
-        <div className="bg-white rounded-lg shadow-sm ">
-          <div className="p-6 -b">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Recent Activity
-            </h3>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {activities.slice(0, 4).map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                  <div>
-                    <p className="text-sm text-gray-900">
-                      <span className="font-medium">{activity.action}</span> -{" "}
-                      {activity.document}
-                    </p>
-                    <p className="text-xs text-gray-500">{activity.time}</p>
+        <div className="bg-white rounded-lg shadow-sm p-4">
+          <div className="bg-[#F5F5F5] h-full">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Recent Activity
+              </h3>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                {activities.slice(0, 4).map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                    <div>
+                      <p className="text-sm text-gray-900">
+                        <span className="font-medium">{activity.action}</span> -{" "}
+                        {activity.document}
+                      </p>
+                      <p className="text-xs text-gray-500">{activity.time}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>

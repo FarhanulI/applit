@@ -13,9 +13,11 @@ export async function middleware(req: NextRequest) {
 
   // Define public routes
   const publicRoutes = [
-    "/",
+    // "/",
     "/signIn",
     "/sign-up",
+    "/auth/reset-password",
+    "/auth/forget-password",
     "/auth/signIn",
     "/auth/sign-up",
   ];

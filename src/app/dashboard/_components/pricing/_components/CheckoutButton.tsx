@@ -30,7 +30,7 @@ export default function CheckoutButton({
   plan,
 }: CheckoutButtonProps) {
   const router = useRouter();
-  const { user, userStats, setUserStats } = useAuthContext();
+  const { user, setUser } = useAuthContext();
   const [loading, setLoading] = useState(false);
 
   const getButtonStyles = (style: "outline" | "gradient" | "single") => {
@@ -110,10 +110,10 @@ export default function CheckoutButton({
     setLoading(true);
     const response = await updateUserPlan(user?.uid as string, {
       currentPlan: null,
-      ...(userStats?.stats!.remainingCoverLetter
+      ...(user?.stats!.remainingCoverLetter
         ? {
             stats: {
-              ...userStats?.stats,
+              ...user?.stats,
               remainingCoverLetter: null,
             },
           }
@@ -122,13 +122,13 @@ export default function CheckoutButton({
 
     setLoading(false);
 
-    setUserStats(response as UserStatsType);
+    setUser(response as UserStatsType);
   };
 
   if (
-    userStats &&
-    userStats?.currentPlan?.type === plan?.id &&
-    getRemainingDays(userStats?.currentPlan?.expiredAt as string) ===
+    user &&
+    user?.currentPlan?.type === plan?.id &&
+    getRemainingDays(user?.currentPlan?.expiredAt as string) ===
       PlanValdityEnum.standard
   ) {
     return (
@@ -152,8 +152,8 @@ export default function CheckoutButton({
   const handleDisable = () =>
     loading ||
     disabled ||
-    (!!userStats?.currentPlan?.type &&
-      getRemainingDays(userStats?.currentPlan.expiredAt as string) ===
+    (!!user?.currentPlan?.type &&
+      getRemainingDays(user?.currentPlan.expiredAt as string) ===
         PlanValdityEnum.standard);
 
   return (

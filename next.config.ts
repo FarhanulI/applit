@@ -1,7 +1,9 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  images: {
+    domains: ["picsum.photos", "firebasestorage.googleapis.com"], // add any external domains you need
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

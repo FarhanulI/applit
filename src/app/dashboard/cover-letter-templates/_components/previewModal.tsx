@@ -1,12 +1,15 @@
 import { Download, ExternalLink, X } from "lucide-react";
 import { CoverLetterDoc } from "../utils";
-
+import { useEffect, useState } from "react";
+import { ref, getDownloadURL, getBlob } from "firebase/storage";
+import { storage } from "@/config/firebase-config";
+import { BiEditAlt } from "react-icons/bi";
 const PreviewModal = ({
   template,
   isOpen,
   onClose,
 }: {
-  template: CoverLetterDoc | null;
+  template: CoverLetterDoc;
   isOpen: boolean;
   onClose: () => void;
 }) => {
@@ -28,13 +31,40 @@ const PreviewModal = ({
     window.open(template.downloadUrl, "_blank");
   };
 
-  if (!isOpen || !template) return null;
+  const [pdfUrl, setPdfUrl] = useState("");
+
+  useEffect(() => {
+    const fetchPDF = async () => {
+      try {
+        const storageRef = ref(
+          storage,
+          "Tasks_Requirements_user_payment (1).pdf"
+        ); // e.g., 'cover_letter/cover_letter_template.pdf'
+        const blob = await getBlob(storageRef);
+        const url = URL.createObjectURL(blob);
+        console.log({ url });
+
+        setPdfUrl(url);
+      } catch (error) {
+        console.error("Error loading PDF:", error);
+      }
+    };
+
+    fetchPDF();
+
+    // Cleanup
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [template.downloadUrl]);
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur  z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 rounded-lg bg-black/40 backdrop-blur  z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col ">
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center rounded-lg justify-between p-6 border-b border-gray-200 bg-[#EDF5FF]">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
               {template.fileName}
@@ -46,14 +76,15 @@ const PreviewModal = ({
           <div className="flex items-center gap-3">
             <button
               onClick={handleOpenInNewTab}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex rounded-lg border border-[#E4EAF5] items-center cursor-pointer gap-2 px-4 py-2 bg-white text-gray-700  hover:bg-gray-200 transition-colors"
             >
-              <ExternalLink size={16} />
-              Open in New Tab
+              <BiEditAlt size={16} />
+              Edit
             </button>
             <button
-              onClick={handleDownload}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              onClick={() => handleDownload()}
+              className="flex rounded-lg items-center cursor-pointer gap-2 px-4 py-2  bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600
+               hover:to-purple-700"
             >
               <Download size={16} />
               Download PDF
@@ -68,19 +99,16 @@ const PreviewModal = ({
         </div>
 
         {/* PDF Preview */}
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 h-2 overflow-hidden">
           <iframe
-            src={`${template.downloadUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-            className="w-full h-full border-0"
-            title={`Preview of ${template.fileName}`}
-            onError={() => {
-              console.error("Failed to load PDF preview");
-            }}
+            src={template.downloadUrl}
+            className="w-full h-screen"
+            title="PDF Viewer"
           />
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex rounded-lg items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
           <div className="text-sm text-gray-600">
             <span className="font-medium">Created:</span>{" "}
             {new Date(template.createdAt).toLocaleDateString()}

@@ -15,7 +15,6 @@ import { ref, uploadBytes, getDownloadURL, getStorage } from "firebase/storage";
 import { UserCvDocument, UserStatsType, UserPurchaseListType } from "./types";
 import { getRandomCategory, LOCAL_PDF_PATH, updateUserWithPlan } from "./utils";
 import { Dispatch, SetStateAction, use } from "react";
-import { UserProfileType } from "../auth/type";
 import { addDays } from "date-fns";
 import { CoverLetterDoc } from "@/app/cover-letter/utils";
 import { pricingPlans } from "@/config/stripe-config";
@@ -35,7 +34,7 @@ export const uploadFile = async (file: File): Promise<string | undefined> => {
   }
 };
 
-export const fetchUserStats = async (user: Partial<UserProfileType> | null) => {
+export const fetchUserStats = async (user: Partial<UserStatsType> | null) => {
   try {
     const userId = user?.uid;
     if (!userId) throw new Error("User ID is required");
@@ -50,8 +49,8 @@ export const fetchUserStats = async (user: Partial<UserProfileType> | null) => {
 };
 
 export const handleCVCorrectionPlan = async (
-  user: UserProfileType,
-  setUserStats: Dispatch<SetStateAction<UserStatsType | undefined>>,
+  userId: string,
+  setUser: Dispatch<SetStateAction<UserStatsType | undefined>>,
   planId: string
 ) => {
   try {
@@ -69,7 +68,7 @@ export const handleCVCorrectionPlan = async (
 
     const downloadUrl = await uploadFile(file);
 
-    await addDoc(collection(db, "documents", user?.uid, "cv"), {
+    await addDoc(collection(db, "documents", userId, "cv"), {
       correction_status: DocumentStatusEnums.processing,
       downloadUrl: downloadUrl || "",
       sessionId: sessionId || "",
@@ -79,7 +78,7 @@ export const handleCVCorrectionPlan = async (
     });
 
     // @ts-ignore
-    return updateUserWithPlan(user?.uid, null, {}, setUserStats);
+    return updateUserWithPlan(user?.uid, null, {}, setUser);
   } catch (error) {
     console.log(error);
     throw error;
@@ -87,8 +86,8 @@ export const handleCVCorrectionPlan = async (
 };
 
 export const handlePaytAsGoPlan = async (
-  user: UserProfileType,
-  setUserStats: Dispatch<SetStateAction<UserStatsType | undefined>>,
+  user: UserStatsType,
+  setUser: Dispatch<SetStateAction<UserStatsType | undefined>>,
   planId: string,
   subscriptionID: string | null,
   paymentMethod: string | null
@@ -119,6 +118,7 @@ export const handlePaytAsGoPlan = async (
         PlanValdityEnum.standard
       ).toISOString(),
       subscriptionID,
+      features: plan.features || [],
       paymentMethod,
     };
 
@@ -126,7 +126,7 @@ export const handlePaytAsGoPlan = async (
       remainingCoverLetter: 1,
     };
 
-    return updateUserWithPlan(user.uid, currentPlan, newStats, setUserStats);
+    return updateUserWithPlan(user?.uid, currentPlan, newStats, setUser);
   } catch (error) {
     console.error("❌ Error handling standard plan:", error);
     return false;
@@ -134,8 +134,8 @@ export const handlePaytAsGoPlan = async (
 };
 
 export const handleStandardPlan = async (
-  user: UserProfileType,
-  setUserStats: Dispatch<SetStateAction<UserStatsType | undefined>>,
+  user: UserStatsType,
+  setUser: Dispatch<SetStateAction<UserStatsType | undefined>>,
   planId: string,
   subscriptionID: string | null,
   paymentMethod: string | null
@@ -167,13 +167,14 @@ export const handleStandardPlan = async (
       ).toISOString(),
       subscriptionID,
       paymentMethod,
+      features: plan.features || [],
     };
 
     const newStats = {
       remainingCoverLetter: 30,
     };
 
-    return updateUserWithPlan(user.uid, currentPlan, newStats, setUserStats);
+    return updateUserWithPlan(user.uid, currentPlan, newStats, setUser);
   } catch (error) {
     console.error("❌ Error handling standard plan:", error);
     return false;
@@ -181,8 +182,8 @@ export const handleStandardPlan = async (
 };
 
 export const handleUnlimitedPlan = async (
-  user: UserProfileType,
-  setUserStats: Dispatch<SetStateAction<UserStatsType | undefined>>,
+  user: UserStatsType,
+  setUser: Dispatch<SetStateAction<UserStatsType | undefined>>,
   planId: string,
   subscriptionID: string | null,
   sessionId: string | null,
@@ -214,13 +215,14 @@ export const handleUnlimitedPlan = async (
       ).toISOString(),
       subscriptionID,
       paymentMethod,
+      features: plan.features || [],
     };
 
     const newStats = {
       remainingCoverLetter: "Unlimited",
     };
 
-    return updateUserWithPlan(user.uid, currentPlan, newStats, setUserStats);
+    return updateUserWithPlan(user.uid, currentPlan, newStats, setUser);
   } catch (error) {
     console.error("❌ Error handling standard plan:", error);
     return false;
@@ -237,10 +239,10 @@ export const updateUserPlan = async (
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, fields);
 
-    const userStats = await fetchUserStats({ uid: userId });
+    const user = await fetchUserStats({ uid: userId });
 
     console.log("✅ Plan canceled successfully.");
-    return userStats;
+    return user;
   } catch (error) {
     console.error("❌ Error canceling plan:", error);
     return null;
@@ -248,10 +250,9 @@ export const updateUserPlan = async (
 };
 
 export const fetchDocuments = async (
-  user: UserProfileType,
+  userId: string,
   docType: string = "cv"
 ): Promise<UserCvDocument[]> => {
-  const userId = user?.uid;
   if (!userId) throw new Error("User ID is required");
 
   try {
@@ -270,7 +271,7 @@ export const fetchDocuments = async (
 };
 
 export const addDocument = async (
-  user: UserProfileType,
+  user: UserStatsType,
   document: Omit<UserCvDocument | CoverLetterDoc, "id"> // Assuming Firestore will auto-generate an ID
 ): Promise<string | null> => {
   const userId = user?.uid;
@@ -323,6 +324,38 @@ export const uploadAndCreateCoverLetters = async () => {
     console.log("✅ 35 documents with categories created successfully.");
   } catch (error) {
     console.error("❌ Failed to upload or write Firestore:", error);
+    throw error;
+  }
+};
+
+/**
+ * Uploads a file to Firebase Storage and returns the download URL
+ */
+export const uploadFileToFirebase = async (
+  file: File,
+  folder: string = "uploads",
+  user: UserStatsType
+): Promise<string> => {
+  try {
+    const timestamp = Date.now();
+    const fileName = `${folder}/${file.name}`;
+
+    // Create a reference
+    const fileRef = ref(storage, fileName);
+
+    // Upload with MIME type
+    await uploadBytes(fileRef, file, {
+      contentType: file.type || "application/octet-stream",
+    });
+
+    // Get download URL
+    const downloadURL = await getDownloadURL(fileRef);
+    if (!downloadURL) throw new Error("Failed to get download URL");
+
+    await updateUserPlan(user?.uid, { photoURL: downloadURL });
+    return downloadURL;
+  } catch (error) {
+    console.error("Upload error:", error);
     throw error;
   }
 };

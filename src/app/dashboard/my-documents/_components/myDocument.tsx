@@ -4,15 +4,16 @@ import { CoverLetterDoc } from "@/app/cover-letter/utils";
 import { useAuthContext } from "@/contexts/auth";
 import { fetchDocuments } from "@/lib/file/apis";
 import { UserCvDocument } from "@/lib/file/types";
+import FileSkeletonLoader from "@/ui/loaders/fileSkeletonLoader";
 import FileSkeleton from "@/ui/skeleton/fileSkeleton";
 import { Download, Eye } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 interface IMyDocument {
-  type: string
+  type: string;
 }
 
-const MyDocument = ({type}: IMyDocument) => {
+const MyDocument = ({ type }: IMyDocument) => {
   const { user } = useAuthContext();
   const [documents, setDocuments] = useState<UserCvDocument[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +46,7 @@ const MyDocument = ({type}: IMyDocument) => {
   useEffect(() => {
     const loadDocs = async () => {
       if (user) {
-        const docs = await fetchDocuments(user, type);
+        const docs = await fetchDocuments(user?.uid, type);
         setDocuments(docs);
       }
       setLoading(false);
@@ -55,7 +56,7 @@ const MyDocument = ({type}: IMyDocument) => {
   }, [user, type]);
 
   if (loading) {
-    return <FileSkeleton />;
+    return <FileSkeletonLoader />;
   }
 
   return (
@@ -120,7 +121,7 @@ const MyDocument = ({type}: IMyDocument) => {
                 {template.fileName}
               </h3>
               <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-                 {/* @ts-ignore */}
+                {/* @ts-ignore */}
                 {template.category}
               </span>
             </div>

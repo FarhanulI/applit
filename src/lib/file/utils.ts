@@ -11,7 +11,7 @@ export const updateUserWithPlan = async (
   userId: string,
   currentPlan: UserPurchaseListType,
   newStats: Partial<UserStatsTypes>,
-  setUserStats: Dispatch<SetStateAction<UserStatsType | undefined>>
+  setUser: Dispatch<SetStateAction<UserStatsType | undefined>>
 ): Promise<boolean> => {
   if (!userId) throw new Error("User ID is required");
 
@@ -34,6 +34,7 @@ export const updateUserWithPlan = async (
     ...newStats,
   };
 
+  // @ts-ignore
   const updatedUserData: UserStatsType = {
     currentPlan: newCurrentPlan,
     purchasePlans: updatedPurchasePlans,
@@ -42,7 +43,7 @@ export const updateUserWithPlan = async (
 
   try {
     await setDoc(userRef, updatedUserData, { merge: true });
-    setUserStats(updatedUserData);
+    setUser(updatedUserData);
 
     return true;
   } catch (error) {

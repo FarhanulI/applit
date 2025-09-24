@@ -39,7 +39,7 @@ export const pricingPlans: PricingPlan[] = [
     period: "per cover letter",
     subtitle: "Best for occasional job applications",
     subtitleStyle: "text-blue-600",
-    buttonText: "Buy Cover Letter",
+    buttonText: "Get Started",
     buttonStyle: "outline",
     popular: false,
     features: [
@@ -64,7 +64,7 @@ export const pricingPlans: PricingPlan[] = [
     period: "for 30 letters",
     subtitle: "~€0.67 per cover letter • Most Popular",
     subtitleStyle: "text-purple-600 font-medium",
-    buttonText: "Get Standard Pack",
+    buttonText: "Get Started",
     buttonStyle: "gradient",
     popular: true,
     features: [
@@ -90,7 +90,7 @@ export const pricingPlans: PricingPlan[] = [
     period: "per month",
     subtitle: "Best for serious job hunters",
     subtitleStyle: "text-orange-600",
-    buttonText: "Start Unlimited Plan",
+    buttonText: "Get Started",
     buttonStyle: "outline",
     popular: false,
     features: [
