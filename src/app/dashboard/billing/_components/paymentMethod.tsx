@@ -18,7 +18,6 @@ const PaymentMethod = () => {
   };
   useEffect(() => {
     handlePaymentInformation();
-    getPaypalInvoice(user!)
   }, [user?.currentPlan]);
 
   return (
