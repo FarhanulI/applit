@@ -2,7 +2,7 @@
 
 import { auth } from "@/config/firebase-config";
 import { useAuthContext } from "@/contexts/auth";
-import { UserStatsType } from "@/lib/auth/type";
+import { UserStatsType } from "@/lib/file/types";
 import { signOut, User } from "firebase/auth";
 import { Settings, CreditCard, FileText, Menu, X } from "lucide-react";
 import Image from "next/image";
