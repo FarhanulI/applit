@@ -4,11 +4,6 @@
 import React, { ReactNode, useMemo } from "react";
 import DashboardSidebar from "./_components/sidebar";
 import { useAuthContext } from "@/contexts/auth";
-import { Zap } from "lucide-react";
-import { UserStatsType } from "@/lib/auth/type";
-import { usePathname } from "next/navigation";
-import { findLastRoute } from "@/utils";
-import { dashboardPageTitle } from "@/constants";
 
 interface IDashboardLayout {
   children: ReactNode;
