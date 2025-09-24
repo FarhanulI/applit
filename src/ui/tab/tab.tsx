@@ -29,7 +29,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs }) => {
   return (
     <div className="w-full mx-auto mt-8">
       {/* Tab List */}
-      <div role="tablist" aria-label="Tabs" className="flex rounded-md">
+      <div role="tablist" aria-label="Tabs" className="flex gap-4 rounded-md">
         {tabs.map((tab, index) => (
           <button
             key={tab.id}
@@ -40,10 +40,10 @@ const Tabs: React.FC<TabsProps> = ({ tabs }) => {
             tabIndex={activeIndex === index ? 0 : -1}
             onClick={() => setActiveIndex(index)}
             onKeyDown={(e) => handleKeyDown(e, index)}
-            className={`text-sm font-medium text-center transition-colors px-4 py-3 focus:outline-none border border-gray-200
+            className={`cursor-pointer font-semibold text-center transition-colors text-md px-4 py-3 focus:outline-none border-2 rounded-lg border-gray-200
               ${
                 activeIndex === index
-                  ? "bg-blue-100 text-blue-700 border-blue-300"
+                  ? " bg-gradient-to-r from-blue-500 to-purple-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50"
               }
               flex-1  // Ensures equal width using flex-grow

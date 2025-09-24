@@ -3,24 +3,28 @@ import Tabs from "@/ui/tab/tab";
 import React from "react";
 import CV from "./_components/myDocument";
 import MyDocument from "./_components/myDocument";
+import PageTitle from "@/ui/text/pageTitle";
 
 const MyDocumentPage = () => {
   return (
-    <Tabs
-      tabs={[
-        {
-          id: "cv",
-          title: "CV",
-          content: <MyDocument type={"cv"} />,
-        },
+    <div>
+      <PageTitle title="My Documents" />
+      <Tabs
+        tabs={[
+          {
+            id: "cv",
+            title: "CV",
+            content: <MyDocument type={"cv"} />,
+          },
 
-        {
-          id: "cover-letter",
-          title: "Cover Letters",
-          content: <MyDocument type={"cover-letter"} />,
-        },
-      ]}
-    />
+          {
+            id: "cover-letter",
+            title: "Cover Letters",
+            content: <MyDocument type={"cover-letter"} />,
+          },
+        ]}
+      />
+    </div>
   );
 };
 

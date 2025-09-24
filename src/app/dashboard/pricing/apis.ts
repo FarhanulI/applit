@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PaymentMethodEnum, SuccessQueryEnum } from "@/enums";
-import { UserProfileType } from "@/lib/auth/type";
+import { UserStatsType, UserStatsTypes } from "@/lib/file/types";
 import { PricingPlan } from "@/types/types";
+import { create } from "domain";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { NextRouter } from "next/router";
 import { Dispatch, SetStateAction } from "react";
@@ -88,9 +89,15 @@ export async function cancelPayPalSubscription(subscriptionId: string) {
 export const createPaypalOrder = async (
   data: any,
   actions: any,
-  plan: PricingPlan
+  plan: PricingPlan,
+  user: UserStatsType | undefined
 ) => {
+  if(!user) throw new Error("User is required for PayPal order creation");
   return actions.order.create({
+    payer: {
+      email_address: user.email,
+     
+    },
     purchase_units: [
       {
         amount: {
@@ -107,7 +114,7 @@ export const createPaypalSubscription = async (
   data: any,
   actions: any,
   plan: PricingPlan,
-  user: UserProfileType
+  user: UserStatsType
 ) => {
   // Make sure your plan object has a paypalPlanId property
   if (!plan.paypalProductId) {
@@ -126,6 +133,23 @@ export const createPaypalSubscription = async (
     },
   });
 };
+
+const createInvoice = async (capture: any) => {
+  try {
+    const res = await fetch("/api/paypal/invoices", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(capture), // send the capture response
+    });
+
+    const data = await res.json();
+    console.log("Invoice created:", data);
+    return data;
+  } catch (err) {
+    console.error("Error creating invoice:", err);
+  }
+};
+
 
 export const onApprovePaypal = async (
   data: {
@@ -164,6 +188,8 @@ export const onApprovePaypal = async (
 
   if (captureData?.status === "COMPLETED") {
     setisOpenPaymentModal(false);
+
+    await createInvoice(captureData);
     router.push(
       `/payment/success?planId=${plan.id}&${SuccessQueryEnum.paymentMethod}=${PaymentMethodEnum.paypal}`
     );

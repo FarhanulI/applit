@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 
 import { useSearchParams } from "next/navigation";
@@ -15,10 +16,11 @@ import {
   handleUnlimitedPlan,
 } from "@/lib/file/apis";
 import { useAuthContext } from "@/contexts/auth";
+import { getPaymentDetails } from "./utils";
 
 // Separate the component that uses useSearchParams
 function SuccessPageContent() {
-  const { user, setUserStats } = useAuthContext();
+  const { user, setUser } = useAuthContext();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const planId = searchParams.get("planId");
@@ -27,46 +29,56 @@ function SuccessPageContent() {
 
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (planId && user && user?.uid) {
-      if (planId === PlansNameEnum.cv_correction) {
-        handleCVCorrectionPlan(user, setUserStats, planId);
-      }
-      if (planId === PlansNameEnum.payAsYouGo) {
+  const handlePlanExecution = async () => {
+    if (!planId || !user?.uid) return;
+
+    const planHandlers = {
+      [PlansNameEnum.cv_correction]: () =>
+        handleCVCorrectionPlan(user.uid, setUser, planId),
+
+      [PlansNameEnum.payAsYouGo]: () =>
         handlePaytAsGoPlan(
           user,
-          setUserStats,
+          setUser,
           planId,
           subscriptionID,
           paymentMethod
-        );
-      }
+        ),
 
-      if (planId === PlansNameEnum.standard) {
+      [PlansNameEnum.standard]: () =>
         handleStandardPlan(
           user,
-          setUserStats,
+          setUser,
           planId,
           subscriptionID,
           paymentMethod
-        );
-      }
+        ),
 
-      if (planId === PlansNameEnum.unlimited) {
+      [PlansNameEnum.unlimited]: () =>
         handleUnlimitedPlan(
           user,
-          setUserStats,
+          setUser,
           planId,
           subscriptionID,
           sessionId,
           paymentMethod
-        );
+        ),
+    };
+
+    // @ts-ignore
+    const handler = planHandlers[planId];
+    if (handler) {
+      const res = await handler();
+
+      if (!!res) {
+        setLoading(false);
       }
     }
-    // Simulate session validation or fetching
-    const timer = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, [planId, user]);
+  };
+
+  useEffect(() => {
+    handlePlanExecution();
+  }, [planId, user, sessionId, subscriptionID]);
 
   if (loading) {
     return (
@@ -131,12 +143,12 @@ function SuccessPageContent() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Link
+          <a
             href="/dashboard"
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition"
           >
             Go to Dashboard
-          </Link>
+          </a>
           <Link
             href="/pricing"
             className="px-6 py-3 border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium rounded-lg transition"

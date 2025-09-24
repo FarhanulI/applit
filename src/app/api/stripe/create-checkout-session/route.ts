@@ -24,9 +24,20 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const customer = await stripe.customers.create({
+      email: user?.email || undefined,
+      name: user?.displayName,
+      metadata: {
+        userId: user?.uid, // link back to your app’s user
+      },
+    });
+
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer_email: user!.email!,
+      customer_creation: "always",
       payment_method_types: ["card"],
       line_items: [
         {

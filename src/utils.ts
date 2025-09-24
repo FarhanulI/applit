@@ -31,3 +31,24 @@ export const centsToEuros = (cents: number): number => {
 export const eurosToCents = (euros: number): number => {
   return Math.round(euros * 100);
 };
+
+export const findLastRoute = (pathname: string) => {
+  const parts = pathname.split("/");
+  return parts[parts.length - 1];
+};
+
+export const formatDateToStr = (dateString: string | undefined): string => {
+  if(!dateString) return "";
+  const date = new Date(dateString);
+
+  const options: Intl.DateTimeFormatOptions = {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  };
+
+  const formatted = new Intl.DateTimeFormat("en-GB", options)?.format(date);
+
+  // Add comma before the year
+  return formatted.replace(/ (\d{4})$/, ", $1");
+};

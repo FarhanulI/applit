@@ -7,6 +7,7 @@ import PreviewModal from "./_components/previewModal";
 import { useAuthContext } from "@/contexts/auth";
 import { UserStatsType } from "@/lib/file/types";
 import FileSkeleton from "@/ui/skeleton/fileSkeleton";
+import PageTitle from "@/ui/text/pageTitle";
 
 const CoverLetter = () => {
   const [templates, seTtemplates] = useState<CoverLetterDoc[]>([]);
@@ -57,9 +58,6 @@ const CoverLetter = () => {
 
   return (
     <div className="p-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-2">
-        Cover Letter Templates
-      </h1>
       <p className="text-gray-600 text-lg mb-6">
         Choose from our collection of professional cover letter templates. Pick
         a design that matches your industry and personal style.
@@ -74,7 +72,6 @@ const CoverLetter = () => {
             <div
               className={`relative h-64 p-4 bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200`}
             >
-
               {/* Mock document content */}
               <div
                 className={`w-full h-full rounded shadow-sm p-3 bg-white text-gray-900`}

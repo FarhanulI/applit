@@ -12,17 +12,26 @@ export type UserPurchaseListType = {
   expiredAt?: string; // ISO string
   subscriptionID?: string | null;
   paymentMethod?: string | null;
+  features?: string[];
 };
 
 export type UserStatsTypes = {
-  remainingCoverLetter: number | string | null
+  remainingCoverLetter: number | string | null;
   uploadedCv?: number;
 };
 
 export type UserStatsType = {
-  purchasePlans: UserPurchaseListType[];
-  stats: UserStatsTypes | null;
-  currentPlan: UserPurchaseListType | null;
+  purchasePlans?: UserPurchaseListType[];
+  stats?: UserStatsTypes | null;
+  currentPlan?: UserPurchaseListType | null;
+  uid: string;
+  email?: string | null;
+  displayName?: string;
+  photoURL?: string | null;
+  createdAt?: string;
+  stripeCustomerId?: string;
+  phone?: string | undefined;
+  language?: string | undefined;
 };
 
 export type UserCvDocument = {

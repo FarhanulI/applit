@@ -14,14 +14,13 @@ import {
 import { User, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/config/firebase-config";
 import { handleSetUserProfile } from "@/lib/auth/utils";
-import { UserProfileType } from "@/lib/auth/type";
 import { fetchUserStats } from "@/lib/file/apis";
 import { UserStatsType } from "@/lib/file/types";
 
 // ✅ 1. Define the shape of the context
 type AuthContextType = {
-  user: UserProfileType | undefined;
-  setUser: Dispatch<SetStateAction<UserProfileType | undefined>>;
+  user: UserStatsType | undefined;
+  setUser: Dispatch<SetStateAction<UserStatsType | undefined>>;
   loading: boolean;
   isLoggedIn: boolean;
   setIsLoggedIn: Dispatch<SetStateAction<boolean>>;
@@ -39,19 +38,19 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [user, setUser] = useState<UserProfileType | undefined>();
+  const [user, setUser] = useState<UserStatsType | undefined>();
   const [loading, setLoading] = useState(true);
   const [userStats, setUserStats] = useState<UserStatsType | undefined>();
 
   const handleSetUserStats = async (user: User | null) => {
     // @ts-ignore
     const stats = await fetchUserStats(user);
-    setUserStats(stats as UserStatsType);
+    setUser(stats as UserStatsType);
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      const userProfile = handleSetUserProfile(firebaseUser);
+    const unsubscribe = onAuthStateChanged(auth, async(firebaseUser) => {
+      const userProfile = await handleSetUserProfile(firebaseUser as UserStatsType);
 
       setUser(userProfile);
       handleSetUserStats(firebaseUser);

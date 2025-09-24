@@ -1,39 +1,48 @@
-import { useRouter } from "next/navigation"; // ✅
-
+"use client";
+import { useRouter } from "next/navigation";
 import { signInWithEmail, signUpWithEmail } from "../../lib/auth/authMethods";
 import { useAuthForm } from "./useAuthForm";
 import { getAuthErrorMessage, handleSetUserProfile } from "@/lib/auth/utils";
 import { useAuthContext } from "@/contexts/auth";
 import { handleCheckSessionFile } from "./utils";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  confirmPasswordReset,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { auth, db } from "@/config/firebase-config";
-import { updateUserWithPlan } from "@/lib/file/utils";
-import { UserProfileType } from "@/lib/auth/type";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { UserStatsType } from "@/lib/file/types";
+import { UserStatsType, UserStatsTypes } from "@/lib/file/types";
 
 export const useAuth = () => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  const { setUser, setUserStats } = useAuthContext();
+  const { setUser } = useAuthContext();
   const router = useRouter();
   const {
     formData,
     errors,
     isLoading,
     showPassword,
+    showNewPassword,
+    showConfirmPassword,
     authError,
     setIsLoading,
     setShowPassword,
+    setShowNewPassword,
+    setShowConfirmPassword,
     setAuthError,
     validateForm,
+    validateResetPasswordForm,
     handleInputChange,
     clearAuthError,
+    resetForm,
   } = useAuthForm();
 
-  const handleStoreUserProfile = async (user: UserProfileType | undefined) => {
+  const handleStoreUserProfile = async (user: UserStatsType | undefined) => {
     if (!user) return;
-    const userRef = doc(db, "users", user.uid);
+    const userRef = doc(db, "users", user?.uid);
 
     const existingDoc = await getDoc(userRef);
 
@@ -43,16 +52,74 @@ export const useAuth = () => {
       currentPlan: null,
       purchasePlans: [],
       stats: null,
+      ...user,
+      displayName: formData?.fullName,
     };
 
     try {
-      await setDoc(userRef, { ...user, ...updatedUserData }, { merge: true });
-      setUserStats(updatedUserData);
+      await setDoc(userRef, updatedUserData, { merge: true });
+      setUser(updatedUserData);
 
       return true;
     } catch (error) {
       console.error("❌ Error updating user with plan:", error);
       return false;
+    }
+  };
+
+  // Send password reset email
+  const handleSendPasswordResetEmail = async (email: string) => {
+    setIsLoading(true);
+    clearAuthError();
+
+    try {
+      await sendPasswordResetEmail(auth, email, {
+        url: `https://applit.vercel.app//reset-password`,
+        handleCodeInApp: true,
+      });
+      return {
+        success: true,
+        message: "Password reset email sent successfully",
+      };
+    } catch (error: unknown) {
+      console.error("Password reset email error:", error);
+      const errorMessage = getAuthErrorMessage(error);
+      setAuthError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Reset password with new password
+  const handleResetPassword = async (e: React.FormEvent, oobCode: string) => {
+    e.preventDefault();
+
+    if (!validateResetPasswordForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    clearAuthError();
+
+    try {
+      // Confirm the password reset with Firebase
+      await confirmPasswordReset(auth, oobCode, formData.newPassword!);
+
+      // Clear form after successful reset
+      resetForm();
+
+      // Redirect to sign in page or show success message
+      router.push("/auth/signin?message=password-reset-success");
+
+      return { success: true, message: "Password reset successfully" };
+    } catch (error: unknown) {
+      console.error("Password reset error:", error);
+      const errorMessage = getAuthErrorMessage(error);
+      setAuthError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -74,7 +141,10 @@ export const useAuth = () => {
       throw new Error("Session creation failed.");
     }
 
-    const userProfile = handleSetUserProfile(user);
+    const userProfile = await handleSetUserProfile({
+      ...user,
+      displayName: formData.fullName as string,
+    });
 
     setUser(userProfile);
 
@@ -86,7 +156,6 @@ export const useAuth = () => {
 
     if (file) {
       router.push("/dashboard/pricing");
-
       return;
     }
     router.push("/dashboard");
@@ -125,7 +194,9 @@ export const useAuth = () => {
       }
 
       // Handle successful sign in
-      const userProfile = handleSetUserProfile(userCredential.user);
+      const userProfile = await handleSetUserProfile(
+        userCredential.user as UserStatsType
+      );
 
       setUser(userProfile);
 
@@ -133,16 +204,11 @@ export const useAuth = () => {
 
       if (file) {
         console.log({ file });
-
         router.push("/dashboard/pricing");
-
         return;
       }
 
       router.push("/dashboard");
-
-      // TODO: Redirect to dashboard or home page after successful sign in
-      // You can use Next.js router here: router.push('/dashboard')
     } catch (error: unknown) {
       console.error("Sign in error:", error);
       const errorMessage = getAuthErrorMessage(error);
@@ -168,9 +234,6 @@ export const useAuth = () => {
         formData.password
       );
 
-      // Handle successful sign in
-      console.log("Register successful:", userCredential.user);
-
       // 🔐 Get Firebase ID token
       const idToken = await userCredential.user.getIdToken();
 
@@ -187,11 +250,18 @@ export const useAuth = () => {
         throw new Error("Session creation failed.");
       }
 
-      const userProfile = handleSetUserProfile(userCredential.user);
+      const userProfile = await handleSetUserProfile({
+        ...userCredential.user,
+        displayName: formData.fullName as string,
+      });
 
-      setUser(userProfile);
+      console.log({ userProfile });
+      debugger;
 
-      const isStoreData = handleStoreUserProfile(userProfile);
+      const isStoreData = await handleStoreUserProfile(userProfile);
+
+      console.log({ isStoreData });
+      debugger;
 
       if (!isStoreData) return;
 
@@ -200,14 +270,10 @@ export const useAuth = () => {
 
       if (file) {
         router.push("/dashboard/pricing");
-
         return;
       }
 
       router.push("/dashboard");
-
-      // TODO: Redirect to dashboard or home page after successful sign in
-      // You can use Next.js router here: router.push('/dashboard')
     } catch (error: unknown) {
       console.error("Sign in error:", error);
       const errorMessage = getAuthErrorMessage(error);
@@ -222,11 +288,18 @@ export const useAuth = () => {
     errors,
     isLoading,
     showPassword,
+    showNewPassword,
+    showConfirmPassword,
     authError,
     setShowPassword,
+    setShowNewPassword,
+    setShowConfirmPassword,
     handleSignIn,
     handleInputChange,
     handleSignUp,
     handleGoogleSignIn,
+    handleSendPasswordResetEmail,
+    handleResetPassword,
+    resetForm,
   };
 };

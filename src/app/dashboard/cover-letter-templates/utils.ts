@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { db } from "@/config/firebase-config";
 import { CoverLetterPlansIdEnum, PlansNameEnum } from "@/enums";
-import { UserProfileType } from "@/lib/auth/type";
 import { updateUserPlan } from "@/lib/file/apis";
 import { UserStatsType } from "@/lib/file/types";
 import { updateUserWithPlan } from "@/lib/file/utils";
@@ -35,20 +34,18 @@ export const getCoverLetters = async (): Promise<CoverLetterDoc[]> => {
 };
 
 export const handleUserDocuments = async (
-  user: UserProfileType,
-  userStats: UserStatsType,
-  setUserStats: Dispatch<React.SetStateAction<UserStatsType | undefined>>
+  user: UserStatsType,
+  setUser: Dispatch<React.SetStateAction<UserStatsType | undefined>>
 ) => {
   const uid = user?.uid;
-  const currentPlan = userStats?.currentPlan;
-  const stats = userStats?.stats;
+  const currentPlan = user?.currentPlan;
+  const stats = user?.stats;
 
-  console.log({currentPlan});
-  
+  console.log({ currentPlan });
 
   if (!uid || !currentPlan) return;
 
-  const updatedStats: UserStatsType = { ...userStats };
+  const updatedStats: UserStatsType = { ...user };
 
   if (currentPlan.type === CoverLetterPlansIdEnum.unlimited) {
     updatedStats.stats = {
@@ -75,7 +72,30 @@ export const handleUserDocuments = async (
     };
 
     // @ts-ignore
-    const res = await updateUserPlan(uid, {currentPlan: null, ...updatedStats});
+    const res = await updateUserPlan(uid, {
+      currentPlan: null,
+      ...updatedStats,
+    });
+
+    if (updatedStats?.stats?.remainingCoverLetter === 0) {
+      const response = await updateUserPlan(user?.uid as string, {
+        currentPlan: null,
+        ...(user?.stats!.remainingCoverLetter
+          ? {
+              stats: {
+                ...user?.stats,
+                remainingCoverLetter: null,
+              },
+            }
+          : {}),
+      });
+
+      setUser(response as UserStatsType);
+
+      console.log({ response });
+
+      return response ?? null;
+    }
 
     return res ?? null;
   }

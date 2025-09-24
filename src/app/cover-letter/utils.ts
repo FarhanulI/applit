@@ -1,6 +1,5 @@
 import { db } from "@/config/firebase-config";
 import { CoverLetterPlansIdEnum } from "@/enums";
-import { UserProfileType } from "@/lib/auth/type";
 import { updateUserPlan } from "@/lib/file/apis";
 import { UserStatsType } from "@/lib/file/types";
 import { collection, getDocs } from "firebase/firestore";
@@ -33,23 +32,22 @@ export const getCoverLetters = async (): Promise<CoverLetterDoc[]> => {
 };
 
 export const handleUserDocuments = async (
-  user: UserProfileType,
-  userStats: UserStatsType
+  user: UserStatsType,
 ) => {
-  if (!user?.uid || !userStats.currentPlan) return;
+  if (!user?.uid || !user.currentPlan) return;
 
-  const currentPlanId = userStats.currentPlan.type;
+  const currentPlanId = user.currentPlan.type;
 
   if (
     CoverLetterPlansIdEnum.standard === currentPlanId &&
-    userStats!.stats &&
-    userStats.stats.remainingCoverLetter
+    user!.stats &&
+    user.stats.remainingCoverLetter
   ) {
     const newStats = {
-      ...userStats,
+      ...user,
       stats: {
-        ...userStats.stats,
-        remainingCoverLetter: Number(userStats.stats.remainingCoverLetter) - 1,
+        ...user.stats,
+        remainingCoverLetter: Number(user.stats.remainingCoverLetter) - 1,
       },
     };
 

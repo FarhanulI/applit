@@ -102,8 +102,9 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
       />
       <label
         htmlFor="cv-upload"
-        className="bg-white text-emerald-600 px-8 py-3 rounded-full font-semibold hover:bg-emerald-50 transition-colors duration-300 
-        shadow-lg hover:shadow-xl transform hover:scale-105"
+        className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600
+               hover:to-purple-700 shadow-lg hover:shadow-xl px-8 py-4 rounded-md font-semibold
+                 transition-colors duration-300 transform hover:scale-105 text-xl"
       >
         {loading ? "Uploading..." : "Get Your CV Corrected Now"}
       </label>

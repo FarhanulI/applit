@@ -10,6 +10,8 @@ import { FaRegClock } from "react-icons/fa";
 import { TbUsers } from "react-icons/tb";
 import { heroBannerFeatures, pricingPlans } from "@/config/stripe-config";
 import CvUploadFile from "./cvUploadFile";
+import { TiTickOutline } from "react-icons/ti";
+import PageTitle from "@/ui/text/pageTitle";
 
 // Type for icon components
 type IconComponent = React.ComponentType<{ className?: string }>;
@@ -25,10 +27,14 @@ const iconMap: Record<string, IconComponent> = {
 
 const PricingPlans = () => {
   return (
-    <div className=" bg-gray-50 py-12 px-4 relative">
-      <div className="max-w-6xl mx-auto">
+    <div className=" px-4 relative">
+      <PageTitle
+        title="Simple, Transparent Pricing"
+        subtitle="Choose the perfect plan for your job search journey in Germany. Start with free job search and upgrade anytime."
+      />
+      <div className=" mt-8">
         {/* Professional CV Correction Banner */}
-        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl p-8 mb-12 text-white relative overflow-hidden">
+        <div className="bg-white rounded-2xl p-8 mb-12 border shadow-md border-blue-active text-black relative overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-4 right-4 w-20 h-20 border border-white/20 rounded-full"></div>
@@ -56,7 +62,9 @@ const PricingPlans = () => {
               once, use forever with unlimited updates and revisions.
             </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <CvUploadFile plan={pricingPlans[0]} />
+
+            <div className="flex items-center flex-wrap justify-center gap-8 mt-12 mb-6">
               {heroBannerFeatures.map((feature, index) => {
                 const IconComponent = iconMap[feature.icon];
                 // Add safety check for undefined icons
@@ -65,9 +73,11 @@ const PricingPlans = () => {
                   return (
                     <div
                       key={index}
-                      className="flex items-center gap-2 text-sm"
+                      className={`flex items-center  text-base text-[#525454] ${
+                        index !== 0 ? "border-l pl-4" : ""
+                      }`}
                     >
-                      <div className="w-4 h-4 bg-emerald-200 rounded-sm" />
+                      <TiTickOutline size="25px" />
                       <span>{feature.text}</span>
                     </div>
                   );
@@ -81,13 +91,11 @@ const PricingPlans = () => {
                 );
               })}
             </div>
-
-            <CvUploadFile plan={pricingPlans[0]} />
           </div>
         </div>
 
         {/* Pricing Cards - Commented out */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {pricingPlans.slice(1).map((plan) => (
             <PricingCard key={plan.id} plan={plan} />
           ))}

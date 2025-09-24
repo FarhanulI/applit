@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // src/components/GoogleLoginButton.jsx
 
-import React from "react";
-import googleLogo from "../assets/google-logo.png"; // Ensure you have a logo
+import React, { FC } from "react";
 
 const GoogleIcon = ({ className = "w-5 h-5" }) => (
   <svg
@@ -29,17 +28,22 @@ const GoogleIcon = ({ className = "w-5 h-5" }) => (
   </svg>
 );
 
+interface IGoogleLoginButton {
+  onClick?: () => void;
+  icon?: React.ReactNode;
+}
+
 // @ts-ignore
-const GoogleLoginButton = ({ onClick }) => {
+const GoogleLoginButton: FC<IGoogleLoginButton> = ({
+  onClick,
+  icon = <GoogleIcon />,
+}) => {
   return (
     <button
       onClick={onClick}
-      className="w-full cursor-pointer flex items-center justify-center space-x-3 px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50 transition-colors duration-200"
+      className="cursor-pointer flex items-center justify-center space-x-3 px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50 transition-colors duration-200"
     >
-      <GoogleIcon />
-      <span className="text-sm font-medium text-gray-700">
-        Sign in with Google
-      </span>
+      {icon}
     </button>
   );
 };
