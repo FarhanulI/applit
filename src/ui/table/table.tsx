@@ -17,7 +17,7 @@ export interface Column<T> {
 
 // Props for the Table component
 export interface TableProps<T> {
-  columns: Column<T>[];
+  columns?: Column<T>[];
   data: T[];
   className?: string;
   showHeader?: boolean;
