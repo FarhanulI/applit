@@ -1,7 +1,7 @@
 "use client";
 import Header from "@/ui/headers/headers";
 import MainLogo from "@/ui/svgs/mainLogo";
-import React from "react";
+import React, { Suspense } from "react";
 
 import { ReactNode } from "react";
 
@@ -11,7 +11,7 @@ interface AuthLayoutProps {
 
 const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
-    <div>
+    <Suspense fallback={<div>Loading...</div>}>
       <Header />
 
       <main className="flex items-center justify-center min-h-[calc(100vh-4rem)] py-12 px-4">
@@ -24,7 +24,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
           {children}
         </div>
       </main>
-    </div>
+    </Suspense>
   );
 };
 
