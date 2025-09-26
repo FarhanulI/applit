@@ -35,16 +35,16 @@ const PageTitle: FC<IPageTitle> = ({
     router.push("/");
   };
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-start lg:ml-0 ml-12">
       <div>
-        <h1 className="text-4xl font-bold text-[#5D5D5D] mb-2">{title}</h1>
+        <h1 className="md:text-4xl text-xl font-bold text-[#5D5D5D] mb-2">{title}</h1>
 
-        <p className="mt-3 text-[#525454]">{subtitle}</p>
+        <p className="mt-3 md:text-base text-xsm text-[#525454]">{subtitle}</p>
       </div>
 
       {showLogoutButton && (
         <Button
-          className="flex gap-2 px-4 cursor-pointer  py-3 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed
+          className="flex gap-2 md:px-4 px-2 cursor-pointer  md:py-3 py-2 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed
               bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600  hover:to-purple-700
                shadow-lg hover:shadow-xl"
           onClick={() => handleLogout()}

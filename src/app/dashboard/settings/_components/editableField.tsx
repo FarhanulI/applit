@@ -54,7 +54,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
   return (
     <div className={`flex items-center justify-between ${className}`}>
       <div className="flex-1">
-        <p className="text-2xl text-black font-semibold mb-1">{label}</p>
+        <p className="md:text-2xl text-xl text-black font-semibold mb-1">{label}</p>
         {isEditing ? (
           <input
             type="text"
@@ -65,11 +65,11 @@ const EditableField: React.FC<EditableFieldProps> = ({
               handleKeyPress(e);
             }}
             placeholder={placeholder}
-            className="min-w-2 px-3 py-2 border border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[#5D5D5D]"
+            className="md:min-w-2 w-28 px-3 py-2 border border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[#5D5D5D]"
             autoFocus
           />
         ) : (
-          <p className="text-[#5D5D5D]">{value || "No value set"}</p>
+          <p className="md:text-base text-sm text-[#5D5D5D]">{value || "No value set"}</p>
         )}
       </div>
 

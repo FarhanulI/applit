@@ -56,12 +56,13 @@ const Settings = () => {
       <div className="mt-4 w-full  mx-auto bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="flex flex-col lg:flex-row">
           {/* Sidebar / Top navigation */}
-          <div className="flex gap-2 lg:flex-col lg:w-76  md:px-8 md: mt-12">
+          <div className="flex gap-2 lg:flex-col lg:w-64 md:px-8 px-3 md:mt-12 mt-4">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-4 text-lg font-medium lg:text-left text-center transition-colors w-full rounded-lg border-b border-[#f5f5f5]
+                className={`md:px-4 md:py-4  px-1 py-2 md:text-lg text-sm font-medium lg:text-left text-center 
+                  transition-colors w-full md:rounded-lg rounded-md border-b border-[#f5f5f5]
                 ${
                   activeTab === tab.key
                     ? "bg-[#E4EAF5] text-blue-active"
@@ -82,9 +83,9 @@ const Settings = () => {
                     <BrandImage url={user?.photoURL as string} />
 
                     <div className="flex items-center gap-3">
-                      <button className="border border-red-500 text-red-500 rounded-lg p-2 cursor-pointer">
+                      {/* <button className="border border-red-500 text-red-500 rounded-lg p-2 cursor-pointer">
                         <BiTrash size="25px" />
-                      </button>
+                      </button> */}
 
                       <div className="relative">
                         <input

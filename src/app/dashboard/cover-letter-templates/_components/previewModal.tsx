@@ -66,7 +66,7 @@ const PreviewModal = ({
         {/* Modal Header */}
         <div className="flex items-center rounded-lg justify-between p-6 border-b border-gray-200 bg-[#EDF5FF]">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="md:text-xl text-md font-semibold text-gray-900">
               {template.fileName}
             </h2>
             <p className="text-sm text-gray-600">
@@ -83,11 +83,11 @@ const PreviewModal = ({
             </button>
             <button
               onClick={() => handleDownload()}
-              className="flex rounded-lg items-center cursor-pointer gap-2 px-4 py-2  bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600
+              className="flex rounded-lg items-center cursor-pointer gap-2 lg:px-4 px-2 py-2  bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600
                hover:to-purple-700"
             >
               <Download size={16} />
-              Download PDF
+              Download
             </button>
             <button
               onClick={onClose}
