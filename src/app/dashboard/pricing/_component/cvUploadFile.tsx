@@ -72,7 +72,7 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative w-full max-w-md mx-auto sm:max-w-lg md:max-w-xl lg:max-w-2xl">
       <input
         type="file"
         id="cv-upload"
@@ -102,11 +102,39 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
       />
       <label
         htmlFor="cv-upload"
-        className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600
-               hover:to-purple-700 shadow-lg hover:shadow-xl px-8 py-4 rounded-md font-semibold
-                 transition-colors duration-300 transform hover:scale-105 text-xl"
+        className="
+           w-full text-center
+          bg-gradient-to-r from-blue-500 to-purple-600 
+          text-white 
+          hover:from-blue-600 hover:to-purple-700 
+          shadow-lg hover:shadow-xl 
+          px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-4 lg:px-10 lg:py-5
+          rounded-md 
+          font-semibold
+          text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl
+          transition-all duration-300 ease-in-out
+          transform hover:scale-105 active:scale-95
+          cursor-pointer
+          leading-tight
+          min-h-[48px] sm:min-h-[52px] md:min-h-[56px] lg:min-h-[60px]
+          flex items-center justify-center
+          disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+        "
+        style={{
+          opacity: loading ? 0.7 : 1,
+          pointerEvents: loading ? "none" : "auto",
+        }}
       >
-        {loading ? "Uploading..." : "Get Your CV Corrected Now"}
+        <span className="break-words hyphens-auto">
+          {loading ? (
+            <>
+              <span className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+              Uploading...
+            </>
+          ) : (
+            "Get Your CV Corrected Now"
+          )}
+        </span>
       </label>
 
       <PaymentModal

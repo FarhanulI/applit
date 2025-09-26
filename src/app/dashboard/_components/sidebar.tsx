@@ -69,18 +69,18 @@ const DashboardSidebar = ({ user }: IDashboardSidebar) => {
   }, [pathname]);
 
   // Prevent body scroll when drawer is open
-  useEffect(() => {
-    if (isDrawerOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+  // useEffect(() => {
+  //   // if (isDrawerOpen) {
+  //   //   document.body.style.overflow = "hidden";
+  //   // } else {
+  //   //   document.body.style.overflow = "unset";
+  //   // }
 
-    // Cleanup on unmount
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isDrawerOpen]);
+  //   // Cleanup on unmount
+  //   return () => {
+  //     document.body.style.overflow = "unset";
+  //   };
+  // }, [isDrawerOpen]);
 
   const SidebarContent = () => (
     <div className="h-full flex flex-col">
@@ -134,7 +134,7 @@ const DashboardSidebar = ({ user }: IDashboardSidebar) => {
       {/* Mobile Menu Button - Only visible on md and below */}
       <button
         onClick={() => setIsDrawerOpen(true)}
-        className="fixed top-4 left-4 z-50 lg:hidden bg-white p-2 rounded-lg shadow-lg border-[#5D5D5D] hover:bg-gray-50 transition-colors"
+        className="fixed top-8 left-4 z-50 lg:hidden bg-white p-2 rounded-lg shadow-lg border-[#5D5D5D] hover:bg-gray-50 transition-colors"
       >
         <Menu className="w-6 h-6 text-gray-600" />
       </button>

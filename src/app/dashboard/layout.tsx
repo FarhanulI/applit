@@ -14,10 +14,10 @@ const DashboardLayout = ({ children }: IDashboardLayout) => {
   const { user } = useAuthContext();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex ">
       <DashboardSidebar user={user} />
 
-      <main className="flex-1 px-8 lg:px-13 lg:ml-64 pt-8 pb-8 bg-[#F5F5F5]">
+      <main className="flex-1 px-5 lg:px-13 lg:ml-64 pt-8 pb-8 bg-[#F5F5F5]  w-screen">
         {/* Main Content */}
         {children}
       </main>

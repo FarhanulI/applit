@@ -49,30 +49,25 @@ const Applications = () => {
       key: "jobTitle",
       title: "Job Title",
       className: "",
-      minWidth: "150px",
     },
     {
       key: "company",
       title: "Company",
-      minWidth: "120px",
     },
     {
       key: "status",
       title: "Status",
       type: "status",
-      minWidth: "100px",
     },
     {
       key: "date",
       title: "Date",
       className: "text-gray-600",
-      minWidth: "110px",
     },
     {
       key: "action",
       title: "Action",
       className: "text-gray-600",
-      minWidth: "120px",
       render: (value:any, row: any) => (
         <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-1 sm:space-y-0">
           {value.split(" / ").map((action:any, index:any) => (
@@ -103,7 +98,6 @@ const Applications = () => {
           hover={true}
           bordered={true}
           rounded={true}
-          minWidth="700px"
         />
       </div>
     </div>

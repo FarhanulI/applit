@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import MainLogo from "../svgs/mainLogo";
 
 const LanguageDropDown = () => {
@@ -68,6 +70,8 @@ const LanguageDropDown = () => {
 
 const Header = () => {
   const [openNavs, setOpenNavs] = useState(false);
+  const dropdownRef = useRef<HTMLElement>(null);
+  
   const navigationItems = [
     { label: "How it works", href: "#" },
     { label: "Resume Builder", href: "#" },
@@ -76,8 +80,34 @@ const Header = () => {
     { label: "Support", href: "#" },
   ];
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (dropdownRef.current && !dropdownRef.current?.contains(event.target)) {
+        setOpenNavs(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Close dropdown on window resize (when switching to desktop)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        setOpenNavs(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    <header className="bg-white border-b shadow-md border-gray-200">
+    <header className="bg-white border-b shadow-md border-gray-200 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -104,53 +134,76 @@ const Header = () => {
             <LanguageDropDown />
             {/* CTA Button */}
             <button
-              className=" bg-gradient-to-r cursor-pointer from-blue-500 to-purple-600 text-white hover:from-blue-600
-               hover:to-purple-700 px-6 py-2 rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow-md"
+              className="md:block hidden bg-gradient-to-r cursor-pointer from-blue-500 to-purple-600 text-white hover:from-blue-600
+               hover:to-purple-700 md:px-6 px-4 py-2 rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow-md"
             >
               Start Free Trial
             </button>
           </div>
 
           {/* Mobile menu button - Show on mobile */}
-          <div className="lg:hidden">
+          {/* @ts-ignore */}
+          <div className="lg:hidden relative" ref={dropdownRef}>
             <button
-              className="text-gray-600 hover:text-gray-900 cursor-pointer"
+              className="text-gray-600 hover:text-gray-900 cursor-pointer p-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
               onClick={() => setOpenNavs(!openNavs)}
             >
               <svg
-                className="w-6 h-6"
+                className={`w-6 h-6 transition-transform duration-200 ${openNavs ? 'rotate-90' : ''}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+                {openNavs ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
               </svg>
             </button>
-          </div>
-        </div>
-      </div>
 
-      {/* Mobile Navigation Menu */}
-      <div
-        className={`lg:hidden bg-white border-t border-gray-200 ${
-          openNavs ? "block" : "hidden"
-        } transition-all duration-300 ease-in-out`}
-      >
-        <div className="px-4 pt-2 pb-3 space-y-1">
-          {navigationItems.map((item, index) => (
-            <a
-              key={index}
-              href={item.href}
-              className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md font-medium"
-            >
-              {item.label}
-            </a>
-          ))}
+            {/* Mobile Navigation Dropdown */}
+            {openNavs && (
+              <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 animate-in slide-in-from-top-2 duration-200">
+                <div className="py-2">
+                  {navigationItems.map((item, index) => (
+                    <a
+                      key={index}
+                      href={item.href}
+                      className="block px-4 py-3 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-150 font-medium"
+                      onClick={() => setOpenNavs(false)}
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                  
+                  {/* Divider */}
+                  <div className="border-t border-gray-200 my-2"></div>
+                  
+                  {/* Mobile CTA Button */}
+                  <div className="px-4 py-2">
+                    <button
+                      className="w-full bg-gradient-to-r cursor-pointer from-blue-500 to-purple-600 text-white hover:from-blue-600
+                       hover:to-purple-700 px-4 py-2 rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow-md"
+                      onClick={() => setOpenNavs(false)}
+                    >
+                      Start Free Trial
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

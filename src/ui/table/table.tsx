@@ -79,10 +79,9 @@ const Table = <T extends Record<string, any>>({
     return value as ReactNode;
   };
 
-  const tableClasses = `w-full bg-white ${className}`.trim();
+  const tableClasses = `w-full bg-white overflow-x-auto ${className}`.trim();
 
-  const containerClasses = `
-    overflow-x-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400
+  const containerClasses = `overflow-x-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400
     ${bordered ? "shadow-sm border border-gray-200" : ""} 
     ${rounded ? "rounded-lg" : ""}
   `.trim();
@@ -90,7 +89,7 @@ const Table = <T extends Record<string, any>>({
   return (
     <div className="w-full">
       <div className={containerClasses}>
-        <table className={tableClasses} style={{ minWidth }}>
+        <table className={tableClasses}>
           {showHeader && (
             <thead>
               <tr className="bg-gray-50 border-b border-[#f5f5f5]">

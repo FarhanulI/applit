@@ -3,7 +3,7 @@
 // components/pricing/PricingPlans.tsx
 import { IoCheckmarkSharp } from "react-icons/io5";
 import PricingCard from "./PricingCard";
-import { BiShield } from "react-icons/bi";
+import { BiCheck, BiShield } from "react-icons/bi";
 import { CiStar } from "react-icons/ci";
 import { GoZap } from "react-icons/go";
 import { FaRegClock } from "react-icons/fa";
@@ -44,20 +44,19 @@ const PricingPlans = () => {
 
           <div className="relative z-10 text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <IoCheckmarkSharp className="w-5 h-5 text-white" />
-              </div>
-              <h1 className="text-2xl md:text-3xl font-bold">
+              <h1 className="text-lg md:text-3xl font-bold">
                 Professional CV Correction
               </h1>
             </div>
 
             <div className="mb-6">
-              <span className="text-4xl md:text-5xl font-bold">€29.99</span>
-              <span className="text-lg ml-2 opacity-90">one-time payment</span>
+              <span className="text-2xl md:text-5xl font-bold">€29.99</span>
+              <span className="md:text-lg text-sm ml-2 opacity-90">
+                one-time payment
+              </span>
             </div>
 
-            <p className="text-lg mb-8 max-w-2xl mx-auto opacity-95">
+            <p className="md:text-lg text-sm mb-8 max-w-2xl mx-auto opacity-95">
               Get your CV professionally corrected to German standards. Pay
               once, use forever with unlimited updates and revisions.
             </p>
@@ -69,15 +68,13 @@ const PricingPlans = () => {
                 const IconComponent = iconMap[feature.icon];
                 // Add safety check for undefined icons
                 if (!IconComponent) {
-                  console.warn(`Icon "${feature.icon}" not found in iconMap`);
                   return (
                     <div
                       key={index}
-                      className={`flex items-center  text-base text-[#525454] ${
-                        index !== 0 ? "border-l pl-4" : ""
-                      }`}
+                      className={`flex items-center gap-3 text-base text-[#525454] `}
                     >
-                      <TiTickOutline size="25px" />
+                      <BiCheck className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+
                       <span>{feature.text}</span>
                     </div>
                   );
