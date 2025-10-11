@@ -414,3 +414,5 @@ const PaymentPage:FC<PaymentPageProps> = ({
     </div>
   );
 }
+
+export default PaymentPage
