@@ -51,15 +51,15 @@ export default function GooglePayButton({
       if (window.paypal) return window.paypal;
 
       try {
-        const res = await fetch("/api/paypal/client-token");
-        const { clientToken } = await res.json();
+        // const res = await fetch("/api/paypal/client-token");
+        // const { clientToken } = await res.json();
 
         return new Promise((resolve, reject) => {
           const script = document.createElement("script");
           script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${currency}&components=googlepay${
             merchantId ? `&merchant-id=${merchantId}` : ""
           }`;
-          script.setAttribute("data-client-token", clientToken);
+          // script.setAttribute("data-client-token", clientToken);
           script.async = true;
 
           script.onload = () => {
