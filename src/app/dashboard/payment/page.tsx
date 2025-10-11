@@ -28,25 +28,7 @@ declare global {
   }
 }
 
-interface PaymentPageProps {
-  currency?: string;
-  clientId?: string;
-  merchantId?: string;
-  environment?: "TEST" | "PRODUCTION";
-  onSuccess?: (orderId: string) => void;
-  onError?: (error: any) => void;
-}
-
-const PaymentPage = ({
-  currency = "USD",
-  clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
-  merchantId = process.env.NEXT_PUBLIC_PAYPAL_MERCHANT_ID,
-  environment = "TEST",
-  //  @ts-ignore
-  onSuccess,
-  //  @ts-ignore
-  onError,
-}) => {
+const PaymentPage = () => {
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
@@ -103,7 +85,7 @@ const PaymentPage = ({
             countryCode: config.countryCode,
             merchantCapabilities: config.merchantCapabilities,
             supportedNetworks: config.supportedNetworks,
-            currencyCode: currency,
+            currencyCode: 'EUR',
             total: {
               label: "Payment",
               amount: amount,
@@ -134,7 +116,7 @@ const PaymentPage = ({
                 },
                 body: JSON.stringify({
                   amount: amount,
-                  currency: currency,
+                  'EUR': 'EUR',
                 }),
               });
 
@@ -162,7 +144,6 @@ const PaymentPage = ({
                     window.ApplePaySession.STATUS_SUCCESS
                   );
                   setShowSuccess(true);
-                  onSuccess?.(orderId);
                 } else {
                   throw new Error("Payment capture failed");
                 }
@@ -172,7 +153,6 @@ const PaymentPage = ({
             } catch (error) {
               console.error("Apple Pay payment error:", error);
               session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-              onError?.(error);
             }
           };
 
@@ -183,7 +163,6 @@ const PaymentPage = ({
           session.begin();
         } catch (error) {
           console.error("Apple Pay initialization error:", error);
-          onError?.(error);
         }
       });
 
@@ -197,9 +176,6 @@ const PaymentPage = ({
     selectedMethod,
     isApplePayAvailable,
     amount,
-    currency,
-    onSuccess,
-    onError,
   ]);
 
   const handleSuccessPayment = () => {
