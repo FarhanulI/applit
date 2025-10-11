@@ -6,6 +6,7 @@ import { getStripe } from "@/lib/stripe/stripe";
 import { CheckoutRequest, PricingPlan } from "@/types/types";
 import React, { useState } from "react";
 import PaymentModal from "./paymentMethodModal";
+import { useRouter } from "next/navigation";
 
 interface ICvUploadFile {
   plan: PricingPlan;
@@ -15,7 +16,7 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
   // @ts-ignore
   const { user } = useAuthContext();
   const [loading, setLoading] = useState(false);
-  const [isOpenPaymentModal, setisOpenPaymentModal] = useState<boolean>(false);
+  const router = useRouter()
 
   const handleCheckout = async () => {
     if (loading) return;
@@ -93,7 +94,7 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
               sessionStorage.setItem("cvFileName", file.name);
 
               console.log("File saved to sessionStorage");
-              setisOpenPaymentModal(true);
+              router.push(`/dashboard/payment?planId=${plan.id}`)
             };
 
             reader.readAsDataURL(file); // Converts file to base64 string
@@ -137,7 +138,7 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
         </span>
       </label>
 
-      <PaymentModal
+      {/* <PaymentModal
         isOpen={isOpenPaymentModal}
         onClose={() => {
           sessionStorage.removeItem("cvFileBase64");
@@ -147,7 +148,7 @@ const CvUploadFile = ({ plan }: ICvUploadFile) => {
         plan={plan!}
         handleStripeCheckout={handleCheckout}
         setisOpenPaymentModal={setisOpenPaymentModal}
-      />
+      /> */}
     </div>
   );
 };

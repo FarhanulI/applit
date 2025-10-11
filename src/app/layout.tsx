@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-// @ts-ignore
 import "./globals.css";
 import { AuthProvider } from "@/contexts/auth";
+import { LanguageProvider } from "@/contexts/languageProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-[#F5F5F5] overflow-x-hidden">
-          <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <LanguageProvider>{children}</LanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   );

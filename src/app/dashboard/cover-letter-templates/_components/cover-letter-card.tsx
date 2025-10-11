@@ -1,6 +1,7 @@
 import React, { FC } from "react";
 import { CoverLetterDoc } from "../utils";
 import { Download, Eye } from "lucide-react";
+import SpinLoader from "@/ui/loaders/spinLoader";
 
 interface ICoverLetterCard {
   template: CoverLetterDoc;
@@ -26,7 +27,7 @@ const CoverLetterCard: FC<ICoverLetterCard> = ({
         <div
           className={`w-full h-full rounded shadow-sm p-3 bg-background-main text-gray-900`}
         >
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <div className="h-4 bg-gray-900 rounded w-3/4"></div>
             <div className="h-2 bg-gray-400 rounded w-1/2"></div>
             <div className="space-y-1 mt-4">
@@ -43,14 +44,18 @@ const CoverLetterCard: FC<ICoverLetterCard> = ({
             <div className="mt-4">
               <div className="h-2 bg-gray-600 rounded w-1/3"></div>
             </div>
-          </div>
+          </div> */}
+          <iframe
+            src={template.downloadUrl}
+            className="w-full h-full"
+            title="PDF Viewer"
+            loading= 'lazy'
+          />
         </div>
 
         {/* Hover overlay */}
-        <div
-          className="absolute inset-0 bg-black bg-opacity-50 opacity-0 
-        group-hover:opacity-100 transition-opacity duration-300 flex items-center
-         justify-center space-x-3"
+        {/* <div
+          className="absolute inset-0 bg-black opacity-0 hover:opacity-50 transition-opacity duration-300 flex items-center justify-center space-x-3"
         >
           <button
             onClick={() => handlePreview(template)}
@@ -69,11 +74,20 @@ const CoverLetterCard: FC<ICoverLetterCard> = ({
               <Download size={18} />
             )}
           </button>
-        </div>
+        </div> */}
 
-        <span className="text-sm px-2 py-1 bg-[#EDF5FF] text-gray-600 rounded-full border border-border-main absolute top-7 right-7">
-          {template.category}
-        </span>
+        <div className="flex gap-1 absolute top-7 right-12 items-center">
+          <button
+            onClick={() => handlePreview(template)}
+            className="bg-blue-500 cursor-pointer text-white p-1 rounded-full hover:bg-blue-600 transition-colors"
+            title="Preview PDF"
+          >
+            <Eye size={16} />
+          </button>
+          <span className="text-sm px-2 py-1 bg-[#EDF5FF] text-gray-600 rounded-full border border-border-main ">
+            {template.category}
+          </span>
+        </div>
       </div>
 
       {/* Template Info */}

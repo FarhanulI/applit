@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-blue-active: #426DFE;
+  --color-blue-active: #426dfe;
   --color-background: #ffffff;
-  --color-background-main: #F5F5F5;
+  --color-background-main: #f5f5f5;
 
   --color-foreground: #171717;
   --font-sans: var(--font-geist-sans);
@@ -27,4 +27,70 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+}
+
+.custom-paypal-button {
+  display: flex;
+  gap: 0.5rem; /* gap-2 = 8px */
+  padding-left: 0.5rem; /* px-2 = 8px */
+  padding-right: 0.5rem;
+  padding-top: 0.5rem; /* py-2 = 8px */
+  padding-bottom: 0.5rem;
+  border-radius: 0.75rem; /* rounded-xl = 12px */
+  font-weight: 600; /* font-semibold */
+  color: white;
+
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+}
+
+.paypal-button.paypal-button-color-darkblue:hover {
+  filter: brightness(1.2);
+  overflow: inherit;
+}
+
+.paypal-button.paypal-button-color-darkblue:focus {
+  outline: none;
+}
+
+.paypal-button.paypal-button-color-darkblue:focus::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  bottom: 5px;
+  left: 5px;
+  border: 0.125rem solid #009cde;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0.5rem #0000a6;
+  pointer-events: none;
+}
+
+.paypal-button .paypal-button-color-black, .paypal-button-color-gold {
+  background-image: linear-gradient(
+    to right,
+    #3b82f6,
+    #8b5cf6
+  ); /* from-blue-500 to-purple-600 */
+}
+
+.my-custom-paypal-button {
+  display: flex !important;
+  gap: 0.5rem !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 0.75rem !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease-in-out !important;
+  background: linear-gradient(to right, #3b82f6, #9333ea) !important;
+  color: white !important;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1) !important;
+  cursor: pointer !important;
+  justify-content: center !important;
+}
+
+.my-custom-paypal-button:hover {
+  background: linear-gradient(to right, #2563eb, #7e22ce) !important;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.1) !important;
 }

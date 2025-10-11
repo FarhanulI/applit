@@ -16,6 +16,7 @@ import { getStripe } from "@/lib/stripe/stripe";
 import { CheckoutRequest, PricingPlan } from "@/types/types";
 import { useState } from "react";
 import { cancelPayPalSubscription, cancelStripeSubscription } from "../apis";
+import { useRouter } from "next/navigation";
 
 interface CheckoutButtonProps {
   planId: string;
@@ -34,10 +35,10 @@ export default function CheckoutButton({
   className = "",
   plan,
 }: CheckoutButtonProps) {
-  // @ts-ignore
+  const router = useRouter()
+
   const { user, setUser } = useAuthContext();
   const [loading, setLoading] = useState(false);
-  const [isOpenPaymentModal, setisOpenPaymentModal] = useState<boolean>(false);
 
   const getButtonStyles = (style: "outline" | "gradient" | "single") => {
     const baseStyles =
@@ -187,13 +188,13 @@ export default function CheckoutButton({
     loading ||
     disabled ||
     (!!user?.currentPlan?.type &&
-      plan.typeNumber <=
+      plan.typeNumber ===
         PlanEnumNum[user.currentPlan.type as keyof typeof PlanEnumNum]);
 
   return (
     <>
       <button
-        onClick={() => setisOpenPaymentModal((prev) => !prev)}
+        onClick={() => router.push(`/dashboard/payment?planId=${plan.id}`)}
         disabled={handleDisable()}
         className={`cursor-pointer ${getButtonStyles(buttonStyle)}`}
       >
@@ -207,13 +208,13 @@ export default function CheckoutButton({
         )}
       </button>
 
-      <PaymentModal
+      {/* <PaymentModal
         isOpen={isOpenPaymentModal}
         onClose={() => setisOpenPaymentModal(false)}
         plan={plan!}
         handleStripeCheckout={handleCheckout}
         setisOpenPaymentModal={setisOpenPaymentModal}
-      />
+      /> */}
     </>
   );
 }
