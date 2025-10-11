@@ -15,7 +15,6 @@ import {
 } from "../apis";
 import { useAuthContext } from "@/contexts/auth";
 import { useRouter } from "next/navigation";
-import AppleButton from "./appleButton";
 import GooglePayButton from "./goolePayButton";
 
 interface PaymentModalProps {
@@ -148,8 +147,6 @@ export default function PaymentModal({
                     />
                   </PayPalProvider>
                 )}
-
-                <AppleButton />
 
                 <GooglePayButton
                   amount="100.00"
