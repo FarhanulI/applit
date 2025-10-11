@@ -22,7 +22,7 @@ const PageTitle: FC<IPageTitle> = ({
   const router = useRouter();
 
   const handleLogout = async () => {
-    setLogoutLoader(false);
+    setLogoutLoader(true);
     setUser(undefined);
 
     await fetch("/api/auth/logout", {
@@ -31,7 +31,7 @@ const PageTitle: FC<IPageTitle> = ({
     });
 
     await signOut(auth);
-    setLogoutLoader(true);
+    setLogoutLoader(false);
     router.push("/");
   };
   return (

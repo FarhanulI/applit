@@ -15,6 +15,8 @@ import {
 } from "../apis";
 import { useAuthContext } from "@/contexts/auth";
 import { useRouter } from "next/navigation";
+import AppleButton from "./appleButton";
+import GooglePayButton from "./goolePayButton";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -40,7 +42,11 @@ export default function PaymentModal({
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed text-black inset-0 bg-black/40 backdrop-blur z-50 flex items-center justify-center p-4 ${isOpen ? 'block' : 'hidden'}`}>
+    <div
+      className={`fixed text-black inset-0 bg-black/40 backdrop-blur z-50 flex items-center justify-center p-4 ${
+        isOpen ? "block" : "hidden"
+      }`}
+    >
       <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b">
@@ -82,27 +88,6 @@ export default function PaymentModal({
                 }}
               />
 
-              {/* <button
-                onClick={async () => {
-                  const payload = {
-                    name: plan.name,
-                    description: plan.description,
-                    price: plan.priceAmount / 100,
-                  };
-                  const response = await fetch("/api/paypal/create-plan", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(payload),
-                  });
-
-                  console.log({ response });
-                }}
-              >
-                aaaaaa
-              </button> */}
-
               <div className="border rounded-md p-2">
                 {plan.type === "one-time" && (
                   <PayPalProvider
@@ -110,6 +95,7 @@ export default function PaymentModal({
                       clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
                       currency: "EUR",
                       intent: "capture",
+                      components: "buttons,applepay",
                     }}
                   >
                     <PayPalButtons
@@ -139,6 +125,7 @@ export default function PaymentModal({
                       currency: "EUR",
                       intent: "subscription",
                       vault: true,
+                      components: "buttons,applepay",
                     }}
                   >
                     <PayPalButtons
@@ -161,6 +148,19 @@ export default function PaymentModal({
                     />
                   </PayPalProvider>
                 )}
+
+                <AppleButton />
+
+                <GooglePayButton
+                  amount="100.00"
+                  currency="USD"
+                  clientId={process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || ""}
+                  merchantId={process.env.NEXT_PUBLIC_PAYPAL_MERCHANT_ID}
+                  environment="TEST" // Change to "PRODUCTION" for live
+                  // useProxy={true} // Set to true to avoid CORS issues on localhost
+                  // onSuccess={handleSuccess}
+                  // onError={handleError}
+                />
               </div>
             </div>
           </div>

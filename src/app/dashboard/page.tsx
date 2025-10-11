@@ -101,6 +101,8 @@ const RecentDocuemnts = ({ user, documents, loading }) => {
 const Dashboard = () => {
   const { user } = useAuthContext();
 
+  console.log({ user });
+
   const [documentsCV, setDocumentsCV] = useState<UserCvDocument[]>([]);
   const [coverLetters, setCoverLetters] = useState<UserCvDocument[]>([]);
   const [loading, setLoading] = useState(true);

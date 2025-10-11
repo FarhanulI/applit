@@ -29,7 +29,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs }) => {
   return (
     <div className="w-full mx-auto mt-8">
       {/* Tab List */}
-      <div role="tablist" aria-label="Tabs" className="flex gap-4 rounded-md">
+      <div role="tablist" aria-label="Tabs" className="flex gap-4 rounded-md gap-4">
         {tabs.map((tab, index) => (
           <button
             key={tab.id}
