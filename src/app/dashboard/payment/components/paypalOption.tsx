@@ -56,8 +56,8 @@ const PaypalOption: FC<ICardOptions> = ({
       removeExistingPayPalScript();
 
       try {
-        const res = await fetch("/api/paypal/client-token");
-        const { clientToken } = await res.json();
+        // const res = await fetch("/api/paypal/client-token");
+        // const { clientToken } = await res.json();
 
         const script = document.createElement("script");
         script.src = `https://www.paypal.com/sdk/js?client-id=${
@@ -67,7 +67,7 @@ const PaypalOption: FC<ICardOptions> = ({
             ? `&merchant-id=${process.env.NEXT_PUBLIC_PAYPAL_MERCHANT_ID}`
             : ""
         }`;
-        script.setAttribute("data-client-token", clientToken);
+        // script.setAttribute("data-client-token", clientToken);
         script.async = true;
 
         script.onload = () => {
