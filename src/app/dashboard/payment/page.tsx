@@ -37,12 +37,14 @@ interface PaymentPageProps {
   onError?: (error: any) => void;
 }
 
-const PaymentPage:FC<PaymentPageProps> = ({
+const PaymentPage = ({
   currency = "USD",
   clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
   merchantId = process.env.NEXT_PUBLIC_PAYPAL_MERCHANT_ID,
   environment = "TEST",
+  //  @ts-ignore
   onSuccess,
+  //  @ts-ignore
   onError,
 }) => {
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
@@ -413,6 +415,6 @@ const PaymentPage:FC<PaymentPageProps> = ({
       </div>
     </div>
   );
-}
+};
 
-export default PaymentPage
+export default PaymentPage;
