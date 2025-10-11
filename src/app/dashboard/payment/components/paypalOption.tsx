@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useAuthContext } from "@/contexts/auth";
+import { PricingPlan } from "@/types/types";
 import SpinLoader from "@/ui/loaders/spinLoader";
 import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
@@ -12,6 +14,7 @@ interface ICardOptions {
   isSDKLoaded: boolean;
   amount: number;
   onSuccess: () => void;
+  plan?: PricingPlan;
 }
 
 const PaypalOption: FC<ICardOptions> = ({
@@ -22,8 +25,10 @@ const PaypalOption: FC<ICardOptions> = ({
   isSDKLoaded,
   amount,
   onSuccess,
+  plan,
 }) => {
   const sdkScriptRef = useRef<HTMLScriptElement | null>(null);
+  const { user } = useAuthContext();
 
   useEffect(() => {
     const removeExistingPayPalScript = () => {
@@ -102,24 +107,51 @@ const PaypalOption: FC<ICardOptions> = ({
             layout: "vertical",
             height: 45,
           },
-          createOrder: (data: any, actions: any) => {
-            return actions.order.create({
-              purchase_units: [
-                {
-                  amount: {
-                    value: amount, // Replace with dynamic value if needed
-                    currency_code: "EUR",
-                  },
+          ...(plan?.id === "unlimited"
+            ? {
+                // Subscription flow
+                createSubscription: (data: any, actions: any) => {
+                  return actions.subscription.create({
+                    plan_id: plan.paypalProductId, // This should be the PayPal billing plan ID
+                    custom_id: user?.uid, // Optional: your internal user ID
+                    application_context: {
+                      brand_name: plan.name,
+                      locale: "en-US",
+                      user_action: "SUBSCRIBE_NOW",
+                      shipping_preference: "NO_SHIPPING",
+                    },
+                  });
                 },
-              ],
-            });
-          },
-          onApprove: (data: any, actions: any) => {
-            return actions.order.capture().then((details: any) => {
-              console.log("PayPal Payment approved:", details);
-              onSuccess();
-            });
-          },
+                onApprove: (data: any, actions: any) => {
+                  console.log("Subscription approved:", data);
+                  onSuccess();
+                },
+              }
+            : {
+                // One-time payment flow
+                createOrder: (data: any, actions: any) => {
+                  return actions.order.create({
+                    payer: {
+                      email_address: user?.email,
+                    },
+                    purchase_units: [
+                      {
+                        amount: {
+                          value: amount,
+                          currency_code: "EUR",
+                        },
+                        description: plan!.description,
+                      },
+                    ],
+                  });
+                },
+                onApprove: (data: any, actions: any) => {
+                  return actions.order.capture().then((details: any) => {
+                    console.log("Card Payment approved:", details);
+                    onSuccess();
+                  });
+                },
+              }),
           onError: (err: any) => {
             console.error("PayPal Button Error:", err);
           },
