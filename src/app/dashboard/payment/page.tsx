@@ -214,6 +214,7 @@ const PaymentPage = () => {
               isSDKLoaded={isSDKLoaded}
               amount={amount}
               onSuccess={handleSuccessPayment}
+              plan={plan}
             />
 
             {/* PayPal */}
