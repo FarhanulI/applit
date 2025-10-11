@@ -140,7 +140,7 @@ const PaypalOption: FC<ICardOptions> = ({
                           value: amount,
                           currency_code: "EUR",
                         },
-                        description: plan!.description,
+                        description: plan?.description,
                       },
                     ],
                   });
