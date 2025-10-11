@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { useAuthContext } from "@/contexts/auth";
+import { PricingPlan } from "@/types/types";
+import SpinLoader from "@/ui/loaders/spinLoader";
 import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -15,6 +18,7 @@ interface GooglePayButtonProps {
   environment?: "TEST" | "PRODUCTION";
   setSelectedMethod: React.Dispatch<React.SetStateAction<string | null>>;
   selectedMethod: string | null;
+  plan: PricingPlan;
 }
 
 declare global {
@@ -34,11 +38,13 @@ export default function GooglePayButton({
   environment = "TEST",
   setSelectedMethod,
   selectedMethod,
+  plan,
 }: GooglePayButtonProps) {
   const [isGooglePayReady, setIsGooglePayReady] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const buttonContainerRef = useRef<HTMLDivElement>(null);
   const paymentsClientRef = useRef<any>(null);
+  const { user } = useAuthContext();
 
   useEffect(() => {
     const loadPayPalSDK = async (): Promise<any> => {
@@ -124,8 +130,11 @@ export default function GooglePayButton({
           console.warn("❌ Not eligible for Google Pay:", isReadyResponse);
           setIsGooglePayReady(false);
         }
+        setIsLoading(false);
       } catch (error) {
         console.error("❌ Error initializing Google Pay:", error);
+        setIsLoading(false);
+
         onError?.(error);
       } finally {
         setIsLoading(false);
@@ -197,8 +206,50 @@ export default function GooglePayButton({
   const onPaymentAuthorized = async (paymentData: any) => {
     return new Promise(async (resolve) => {
       try {
+        // Create subscription
+        if (plan?.type === "subscription") {
+          try {
+            const createSubscriptionResponse = await fetch(
+              "/api/paypal/create-subscription",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ plan, userId: user?.uid }),
+              }
+            );
+
+            if (!createSubscriptionResponse.ok) {
+              const errorData = await createSubscriptionResponse.json();
+              throw new Error(
+                errorData.error || "Failed to create subscription"
+              );
+            }
+
+            const { approvalUrl } = await createSubscriptionResponse.json();
+
+            if (approvalUrl) {
+              setIsLoading(true);
+              window.location.href = approvalUrl;
+            } else {
+              throw new Error("No approval URL received from PayPal");
+            }
+          } catch (error) {
+            console.error("Subscription creation error:", error);
+            onError?.(error);
+            resolve({
+              transactionState: "ERROR",
+              error: {
+                intent: "PAYMENT_AUTHORIZATION",
+                message: error || "Subscription initiation failed",
+              },
+            });
+          }
+          return; // Make sure you don't proceed to the order logic
+        }
         // Create order on server
-        const createOrderResponse = await fetch("/api/orders", {
+        const createOrderResponse = await fetch("/api/paypal/create-order", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -223,28 +274,16 @@ export default function GooglePayButton({
             paymentMethodData: paymentData.paymentMethodData,
           });
 
-        // Handle 3DS if required
-        if (confirmOrderResponse.status === "PAYER_ACTION_REQUIRED") {
-          await window.paypal.Googlepay().initiatePayerAction({ orderId });
-
-          // Get order details after 3DS
-          const orderDetailsResponse = await fetch(`/api/orders/${orderId}`, {
-            method: "GET",
-          });
-          const orderDetails = await orderDetailsResponse.json();
-        }
-
         // Capture payment
         if (
           confirmOrderResponse.status === "APPROVED" ||
           confirmOrderResponse.status === "PAYER_ACTION_REQUIRED"
         ) {
-          const captureResponse = await fetch(
-            `/api/orders/${orderId}/capture`,
-            {
-              method: "POST",
-            }
-          );
+          const captureResponse = await fetch(`/api/paypal/capture-order`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderID: orderId }),
+          });
 
           if (!captureResponse.ok) {
             throw new Error("Failed to capture payment");
@@ -348,6 +387,12 @@ export default function GooglePayButton({
           </div>
         </div>
       </div>
+
+      {isLoading && (
+        <div className="mt-4 sm:mt-6 flex justify-center">
+          <SpinLoader />
+        </div>
+      )}
 
       {selectedMethod === "google" && (
         <div className="mt-4 sm:mt-6 mx-auto">

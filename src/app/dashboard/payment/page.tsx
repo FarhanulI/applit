@@ -299,6 +299,7 @@ const PaymentPage = () => {
               setSelectedMethod={setSelectedMethod}
               amount={String(amount)}
               onSuccess={handleSuccessPayment}
+              plan={plan!}
             />
           </div>
 

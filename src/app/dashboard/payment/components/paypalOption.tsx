@@ -137,7 +137,7 @@ const PaypalOption: FC<ICardOptions> = ({
                     purchase_units: [
                       {
                         amount: {
-                          value: `${plan!.priceAmount / 100}`,
+                          value: amount,
                           currency_code: "EUR",
                         },
                         description: plan!.description,
