@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, FC } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import {
@@ -37,14 +37,14 @@ interface PaymentPageProps {
   onError?: (error: any) => void;
 }
 
-export default function PaymentPage({
+const PaymentPage:FC<PaymentPageProps> = ({
   currency = "USD",
   clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
   merchantId = process.env.NEXT_PUBLIC_PAYPAL_MERCHANT_ID,
   environment = "TEST",
   onSuccess,
   onError,
-}: PaymentPageProps) {
+}) => {
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
